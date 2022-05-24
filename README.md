@@ -1,7 +1,7 @@
 # CS490-Group-Project
 
 <h2>Due Dates:</h2>
-<table>
+<table style="width: 100%">
      <tr>
           <th>Sprint</th>
           <th>Planned Due Date</th>
