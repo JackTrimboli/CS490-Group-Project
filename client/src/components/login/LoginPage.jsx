@@ -4,7 +4,7 @@ import './LoginPage.css'
 const LoginPage = () => {
     return (
         <div className='login-wrapper'>
-            <h1 className='login-heading'>Placeholder</h1>
+            <h1 className='login-heading'>CritiCode</h1>
             <form className='login-form'>
                 <label className='login-form-field'>
                     Username:
@@ -12,7 +12,7 @@ const LoginPage = () => {
                 </label>
                 <label className='login-form-field'>
                     Password:
-                    <input className='login-form-input' placeholder='Enter password' />
+                    <input className='login-form-input' type="password" placeholder='Enter password' />
                 </label>
                 <button className='login-form-btn' type='submit'>Login</button>
             </form>
