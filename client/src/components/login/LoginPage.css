@@ -1,6 +1,12 @@
 @import url("https://fonts.googleapis.com/css2?family=Montserrat&display=swap");
-
 .login-wrapper {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-top: 10%;
+}
+.login-main {
   width: 700px;
   height: 500px;
   border-radius: 20px;
