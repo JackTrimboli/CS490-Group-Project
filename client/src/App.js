@@ -3,7 +3,7 @@ import LoginPage from './components/login/LoginPage';
 import ProtectedRoute from './components/shared/ProtectedRoute';
 import Landing from './components/landing/Landing';
 import { useState } from 'react';
-import { Routes, Route, BrowserRouter, Navigate } from 'react-router-dom';
+import { Routes, Route, HashRouter, Navigate } from 'react-router-dom';
 
 function App() {
 
@@ -16,7 +16,7 @@ function App() {
   }
 
   return (
-    <BrowserRouter>
+    <HashRouter>
       <Routes className="App">
         <Route
           index
@@ -30,7 +30,7 @@ function App() {
             </ProtectedRoute>
           } />
       </Routes>
-    </BrowserRouter>
+    </HashRouter>
   );
 }
 
