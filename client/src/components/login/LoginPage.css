@@ -1,22 +1,21 @@
-@import url("https://fonts.googleapis.com/css2?family=Montserrat&display=swap");
+/* @import url("https://fonts.googleapis.com/css2?family=Montserrat&display=swap"); */
 .login-wrapper {
   height: 100%;
   width: 100%;
   display: flex;
   justify-content: center;
-  margin-top: 10%;
 }
 .login-main {
   width: 700px;
   height: 500px;
   border-radius: 20px;
+  margin-top: 10%;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   background-color: #2e8bc0;
   color: white;
-  font-family: "Montserrat", sans-serif;
 }
 .login-heading {
   font-weight: 900;
