@@ -3,17 +3,19 @@ If a > preceds an opcode it is a return of the another opCode
 EX: opCode | key, key ... | Comments
 
 login | name, pass<br/>
->login | id, name, type<br/>
->badLogin |<br/>
+\>login | id, name, type<br/>
+\>badLogin |<br/>
 createQuestion | teacherID, text, testCases[], difficulty, topic<br/>
 getQuestions | ?teacherID, ?testID<br/>
->questions | questions[id, text, testCases[]]<br/>
+\>questions | questions[id, text, testCases[], difficulty, topic]<br/>
+getTopics | ?teacherID<br/>
+\>topics
 createTest | name, teacher, questions[id] | questions is just the IDS<br/>
 editTest | testID, ?addQuests[id], ?remQuests[id]<br/>
-getTests | ?teacher, ?questions | questions is a boolean value to return the questions along with basic test information<br/>
->tests | tests[id, teacher, name, questionCount, ?question[id, text, testCases[]]]<br/>
+getTests | ?teacherID, ?questions | questions is a boolean value to return the questions along with basic test information<br/>
+\>tests | tests[id, teacher, name, questionCount, ?question[id, text, testCases[]]]<br/>
 getTest | testID | returns test along with questions<br/>
->test | testID, teacherID, testName, questions[id, text, testCase[case]] || Contains everything needed to take the test<br/>
+\>test | testID, teacherID, testName, questions[id, text, testCase[case]] || Contains everything needed to take the test<br/>
 sendTest | testID, userID, questions[ID, answer] | Used to send a test questions answers when a student finishes the test<br/>
 getScoringMaterial | testID<br/>
->scoringMaterial | testID, users[id, answers[questionId, answer]], questions[id, text, testCases[]]<br/>
+\>scoringMaterial | testID, users[id, answers[questionId, answer]], questions[id, text, testCases[]]<br/>
