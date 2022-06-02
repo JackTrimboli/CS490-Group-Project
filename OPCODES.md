@@ -2,10 +2,10 @@ List all opCodes along with what values need to be included, if a key is followe
 If a > preceds an opcode it is a return of the another opCode
 EX: opCode | key, key ... | Comments
 
-login | name, pass
+login | name, pass<br>
 >login | id, name, type
 >badLogin |
-createQuestion | teacherID, text, testCases[]
+createQuestion | teacherID, text, testCases[], difficulty, topic
 getQuestions | ?teacherID, ?testID
 >questions | questions[id, text, testCases[]]
 createTest | name, teacher, questions[id] | questions is just the IDS
