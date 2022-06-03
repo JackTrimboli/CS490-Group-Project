@@ -6,6 +6,7 @@ login | name, pass<br/>
 \>login | id, name, type<br/>
 \>badLogin |<br/>
 createQuestion | teacherID, text, functionName, testCases[case, output], difficulty, topic<br/>
+\>newQuestion | questionID<br/>
 getQuestions | ?teacherID, ?testID<br/>
 \>questions | questions[id, text, testCases[case, output], difficulty, topic]<br/>
 getTopics | ?teacherID<br/>
