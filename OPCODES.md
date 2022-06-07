@@ -10,7 +10,7 @@ createQuestion | teacherID, text, functionName, testCases[case, output], difficu
 getQuestions | ?teacherID, ?testID<br/>
 \>questions | questions[id, text, testCases[case, output], difficulty, topic]<br/>
 getTopics | ?teacherID<br/>
-\>topics | <br/>
+\>topics | topics[]<br/>
 createTest | name, teacher, questions[id, value] | questions is just the IDS<br/>
 editTest | testID, ?addQuests[id, value], ?remQuests[id]<br/>
 getTests | ?teacherID, ?questions | questions is a boolean value to return the questions along with basic test information<br/>
