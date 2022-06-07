@@ -15,5 +15,11 @@
   "bugs": {
     "url": "https://github.com/JackTrimboli/CS490-Group-Project/issues"
   },
-  "homepage": "https://github.com/JackTrimboli/CS490-Group-Project#readme"
+  "homepage": "https://github.com/JackTrimboli/CS490-Group-Project#readme",
+  "dependencies": {
+    "@emotion/react": "^11.9.0",
+    "@emotion/styled": "^11.8.1",
+    "@mui/material": "^5.8.2",
+    "axios": "^0.27.2"
+  }
 }
