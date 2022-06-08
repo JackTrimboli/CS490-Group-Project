@@ -15,9 +15,9 @@ createTest | name, teacherID, questions[id, value] | questions is just the IDS<b
 \>newTest | testID<br/>
 editTest | testID, ?addQuests[id, value], ?remQuests[id]<br/>
 getTests | ?teacherID, ?questions | questions is a boolean value to return the questions along with basic test information<br/>
-\>tests | tests[testID, teacherID, testName, ?questions[id, text, testCases[]]]<br/>
+\>tests | tests[testID, teacherID, testName, ?questions[questionID, teacherID, questionText, testCases[input, output], functionName, difficulty, topic, questionValue]]<br/>
 getTest | testID | returns test along with questions<br/>
-\>test | testID, teacherID, testName, questions[id, text, testCase[case]] | Contains everything needed to take the test<br/>
+\>test | testID, teacherID, testName, questions[questionID, teacherID, questionText, testCases[input, output], functionName, difficulty, topic, questionValue] | Contains everything needed to take the test<br/>
 sendTest | testID, userID, questions[ID, answer] | Used to send a test questions answers when a student finishes the test<br/>
 getScoringMaterial | testID<br/>
 \>scoringMaterial | testID, users[userID, answers[questionID, answer]]<br/>
