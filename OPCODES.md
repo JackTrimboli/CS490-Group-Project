@@ -21,7 +21,7 @@ getTest | testID | returns test along with questions<br/>
 sendTest | testID, userID, questions[ID, answer] | Used to send a test questions answers when a student finishes the test<br/>
 getScoringMaterial | testID<br/>
 \>scoringMaterial | testID, users[userID, answers[questionID, answer]]<br/>
-sendScores | testID, users[userID, questions[questionID, functionName, testFunction, functionScore, functionActualScore, scores[input, expectedOutput, actualOutput, autoScore, actualScore]]]<br/>
+sendScores | testID, users[userID, questions[questionID, functionName, testFunction, functionScore, scores[input, expectedOutput, actualOutput, autoScore]]]<br/>
 getScores | testID, userID<br/>
 \>scores | testID, userID, questions[questionID, functionName, testFunction, functionScore, functionActualScore, cases[input, expectedOutput, actualOutput, autoScore, actualScore], comment]<br/>
 updateScore | testID, users[userID, questions[questionID, functionActualScore, scores[input, actualScore]]]<br/>
