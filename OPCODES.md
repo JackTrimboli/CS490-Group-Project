@@ -23,5 +23,5 @@ getScoringMaterial | testID<br/>
 \>scoringMaterial | testID, users[userID, answers[questionID, answer]]<br/>
 sendScores | testID, users[userID, questions[questionID, functionName, testFunction, functionScore, scores[input, expectedOutput, actualOutput, autoScore]]]<br/>
 getScores | testID, userID<br/>
-\>scores | testID, userID, questions[questionID, functionName, testFunction, functionScore, functionActualScore, cases[input, expectedOutput, actualOutput, autoScore, actualScore], comment]<br/>
+\>scores | testID, userID, questions[questionID, functionName, testFunction, functionScore, functionActualScore, scores[input, expectedOutput, actualOutput, autoScore, actualScore], comment]<br/>
 updateScore | testID, userID, questions[questionID, functionActualScore, scores[input, actualScore]]<br/>
