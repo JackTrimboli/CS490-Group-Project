@@ -20,6 +20,6 @@ getTest | testID | returns test along with questions<br/>
 sendTest | testID, userID, questions[ID, answer] | Used to send a test questions answers when a student finishes the test<br/>
 getScoringMaterial | testID<br/>
 \>scoringMaterial | testID, users[userID, answers[questionId, answer]]<br/>
-sendScores | testID, users[userID, scores[input, expectedOutput, actualOutput, autoScore, actualScore]]
-getScores | testID, userID
-\>scores | testID, userID, questions[questionID, cases[input, expectedOutput, actualOutput, autoScore, actualScore], comment]
+sendScores | testID, users[userID, scores[input, expectedOutput, actualOutput, autoScore, actualScore]]<br/>
+getScores | testID, userID<br/>
+\>scores | testID, userID, questions[questionID, cases[input, expectedOutput, actualOutput, autoScore, actualScore], comment]<br/>
