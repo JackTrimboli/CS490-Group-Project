@@ -16,7 +16,10 @@ editTest | testID, ?addQuests[id, value], ?remQuests[id]<br/>
 getTests | ?teacherID, ?questions | questions is a boolean value to return the questions along with basic test information<br/>
 \>tests | tests[testID, teacherID, testName, ?questions[id, text, testCases[]]]<br/>
 getTest | testID | returns test along with questions<br/>
-\>test | testID, teacherID, testName, questions[id, text, testCase[case]] || Contains everything needed to take the test<br/>
+\>test | testID, teacherID, testName, questions[id, text, testCase[case]] | Contains everything needed to take the test<br/>
 sendTest | testID, userID, questions[ID, answer] | Used to send a test questions answers when a student finishes the test<br/>
 getScoringMaterial | testID<br/>
-\>scoringMaterial | testID, users[id, answers[questionId, answer]], questions[id, text, testCases[]]<br/>
+\>scoringMaterial | testID, users[userID, answers[questionId, answer]]<br/>
+sendScores | testID, users[userID, scores[input, expectedOutput, actualOutput, autoScore, actualScore]]
+getScores | testID, userID
+\>scores | testID, userID, questions[questionID, cases[input, expectedOutput, actualOutput, autoScore, actualScore], comment]
