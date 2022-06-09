@@ -13,7 +13,7 @@ getTopics | ?teacherID<br/>
 \>topics | topics[]<br/>
 createTest | name, teacherID, questions[id, value] | questions is just the IDS<br/>
 \>newTest | testID<br/>
-editTest | testID, ?addQuests[id, value], ?remQuests[id]<br/>
+editTest | testID, ?addQuests[id, value], ?remQuests[id], ?questions[id, value]<br/>
 getTests | ?teacherID, ?questions | questions is a boolean value to return the questions along with basic test information<br/>
 \>tests | tests[testID, teacherID, testName, ?questions[questionID, teacherID, questionText, testCases[input, output], functionName, difficulty, topic, questionValue]]<br/>
 getTest | testID | returns test along with questions<br/>
