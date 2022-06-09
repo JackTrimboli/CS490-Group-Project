@@ -1,0 +1,26 @@
+.exams-wrapper {
+  width: 90%;
+  height: 100%;
+  margin: 50px auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.exam-list-wrapper {
+  width: 100%;
+}
+.exam-actions {
+  width: 100%;
+  display: flex;
+  justify-content: space-around;
+  padding: 25px 0;
+  background-color: #fff;
+}
+.exam-filters {
+  display: flex;
+  /* background-color: #fff; */
+  width: 100%;
+}
+.exam-list {
+  width: 100%;
+}

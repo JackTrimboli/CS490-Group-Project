@@ -1,12 +1,12 @@
 import { React } from 'react'
-import StudentLanding from './StudentLanding'
-import TeacherLanding from './TeacherLanding'
+import StudentExams from './StudentExams'
+import ExamBank from './ExamBank'
 
 const Landing = (props) => {
 
     if (props.userObj.type === "teacher")
-        return <TeacherLanding />
-    return <StudentLanding />
+        return <ExamBank user={props.userObj} />
+    return <ExamBank user={props.userObj} isStudent={true} />
 }
 
 export default Landing
