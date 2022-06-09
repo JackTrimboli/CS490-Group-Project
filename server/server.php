@@ -6,9 +6,11 @@ $inputData = json_decode($json, true);
 if(debug && !isset($inputData['opCode']))
 {
 	echo 'Debug Mode<br>';
-	$inputData['opCode'] = 'getQuestions';
+	$inputData['opCode'] = 'getScores';
 	$inputData['teacherID'] = 2;
-	//$inputData['testID'] = 4;
+	$inputData['testID'] = 4;
+	$inputData['userID'] = 1;
+	$inputData['questions'] = [array('ID'=>27, 'answer'=>'testing2')];
 
 	//login
 	$inputData['name'] = 'adam';
@@ -33,7 +35,6 @@ else if(logging)
 	$logEntry = date('l jS \of F Y h:i:s A') . "\n" . $json . "\n\n";
 	file_put_contents('logs/log.txt', $logEntry, FILE_APPEND | LOCK_EX);
 }
-
 
 $opCode = -1;
 if(isset($inputData['opCode'])) $opCode = $inputData['opCode'];
@@ -66,6 +67,7 @@ switch($opCode)
 		else
 		{
 			//Missing information throw an error
+			echo 'Missing Parameters!';
 		}
 		break;
 	case 'createQuestion':
@@ -164,13 +166,15 @@ switch($opCode)
 			VALUES (' . sqlList(['teacherID', 'name']) . ');
 			SELECT LAST_INSERT_ID() AS testID;';
 			$result = sql($sqlQuery)[1][0];
-			$sqlQuests = 'INSERT INTO TestQuestions (testID, questionID, questionValue)
-			VALUES';
-			foreach($inputData['questions'] as $question)
+			if(count($inputData['questions']) > 0)
 			{
-				$sqlQuests .= "({$result['testID']}, '{$question['id']}', '{$question['value']}'), ";
+				$sqlQuests = 'INSERT INTO TestQuestions (testID, questionID, questionValue) VALUES';
+				foreach($inputData['questions'] as $question)
+				{
+					$sqlQuests .= "({$result['testID']}, '{$question['id']}', '{$question['value']}'), ";
+				}
+				sql(rtrim($sqlQuests, ', '));
 			}
-			sql(rtrim($sqlQuests, ', '));
 
 			$json = json_encode(array('opCode'=>'newTest', 'testID'=>$result['testID']));
 			echo $json;
@@ -178,6 +182,7 @@ switch($opCode)
 		}
 		else
 		{
+			echo 'Missing Parameters!';
 
 		}
 		break;
@@ -206,10 +211,22 @@ switch($opCode)
 				$sqlQuests .= ');';
 				sql($sqlQuests);
 			}
+
+			if(checkParams('questions'))
+			{
+				$sqlRem = "DELETE FROM TestQuestions WHERE testID = {$inputData['testID']};";
+				$sqlQuests = 'INSERT INTO TestQuestions (testID, questionID, questionValue)
+				VALUES';
+				foreach($inputData['questions'] as $question)
+				{
+					$sqlQuests .= "({$inputData['testID']}, '{$question['id']}', '{$question['value']}'), ";
+				}
+				sql($sqlRem . rtrim($sqlQuests, ', '));
+			}
 		}
 		else
 		{
-
+			echo 'Missing Parameters!';
 		}
 		break;
 	case 'getTest':
@@ -224,7 +241,7 @@ switch($opCode)
 			$sqlQuery .= " WHERE teacherID = {$inputData['teacherID']}";
 		$results = sql($sqlQuery)[0];
 
-		if(checkParams('questions') && $inputData['questions'])
+		if(checkParams('questions') && $inputData['questions'] && count($results) != 0)
 		{
 			//List all testIDs
 			$testIDs = [];
@@ -232,7 +249,8 @@ switch($opCode)
 			{
 				array_push($testIDs, $row['testID']);
 			}
-
+			
+			
 			//Get the questions for each test
 			$sqlQuests = "";
 			foreach($testIDs as $id)
@@ -264,14 +282,15 @@ switch($opCode)
 						array_push($questIndex, $question['questionID']);
 					}
 				}
-
-				
 			}
 		}
 
-		if($inputData['opCode'] == 'getTest' && count($results) > 0)
+		if($inputData['opCode'] == 'getTest')
 		{//Return single test
-			$test = $results[0];
+			if(count($results) > 0)
+				$test = $results[0];
+			else
+				$test = [];
 			$test['opCode'] = 'test';
 			$json = json_encode($test);
 		}
@@ -283,6 +302,173 @@ switch($opCode)
 		echo $json;
 		return $json;
 
+		break;
+	case 'sendTest':
+		if(checkParams(['testID', 'userID', 'questions']))
+		{
+			$sqlQuery = "INSERT INTO TestScores (testID, userID, questionID, answer) VALUES ";
+			foreach($inputData['questions'] as $question)
+			{
+				$sqlQuery .= "({$inputData['testID']}, {$inputData['userID']}, {$question['ID']}, '{$question['answer']}'), ";
+			}
+			sql(rtrim($sqlQuery, ', '));
+			echo $sqlQuery . '\n';
+		}
+		else
+		{
+			echo 'Missing Parameters!';
+		}
+		break;
+	case 'getScoringMaterial':
+		if(checkParams('testID'))
+		{
+			$sqlQuery = "SELECT userID, questionID, answer FROM TestScores WHERE testID = {$inputData['testID']}";
+			$results = sql($sqlQuery)[0];
+			
+			$users = [];
+			$userIndexs = [];
+			foreach($results as $row)
+			{
+				$index = array_search($row['userID'], $userIndexs);
+				if($index !== False)
+				{
+					//Just add the found test cases
+					array_push($users[$index]['questions'], array('questionID'=>$row['questionID'], 'answer'=>$row['answer']));
+				}
+				else
+				{
+					array_push($users, array('userID' => $row['userID'], 'questions' => [array('questionID'=>$row['questionID'], 'answer'=>$row['answer'])]));
+					array_push($userIndexs, $row['userID']);
+				}
+			}
+
+			$output = array('opCode' => 'scoringMaterial', 'testID' => $inputData['testID'], 'users' => $users);
+			$json = json_encode($output);
+			echo $json;
+			return $json;
+		}
+		else
+		{
+			echo 'Missing Parameters!';
+		}
+
+		break;
+	case 'sendScores':
+		if(checkParams(['testID', 'users']))
+		{
+			$sqlQuery = 'INSERT INTO TestScores (testID, userID, questionID, functionName, testFunctionName, functionScore, functionActualScore) VALUES ';
+			$sqlCases = 'INSERT INTO TestScoreCases (testID, userID, questionID, input, expectedOutput, actualOutput, autoScore, actualScore) VALUES ';
+
+			//Insert Value Generation
+			foreach($inputData['users'] as $user)
+			{
+				foreach($user['questions'][0] as $question)
+				{
+					$sqlQuery .= "({$inputData['testID']}, {$user['userID']}, {$question['questionID']}, '{$question['functionName']}', '{$question['testFunction']}', {$question['functionScore']},
+					{$question['functionScore']}), ";
+					//$sqlQuery .= "({$inputData['testID']}, {$user['userID']}, {$question['questionID']}), ";
+					foreach($question['scores'] as $case)
+					{
+						$sqlCases .= "({$inputData['testID']}, {$user['userID']}, {$question['questionID']}, '{$case['input']}', '{$case['expectedOutput']}',  '{$case['actualOutput']}',  {$case['autoScore']},
+						{$case['autoScore']}), ";
+					}
+				}
+			}
+
+			//Trim both querys
+			$sqlQuery = rtrim($sqlQuery, ', ');
+			$sqlCases = rtrim($sqlCases, ', ');
+
+			$sqlQuery .= ' ON DUPLICATE KEY UPDATE testID=VALUES(testID), userID=VALUES(userID), questionID=VALUES(questionID), functionName=VALUES(functionName), testFunctionName=VALUES(testFunctionName),
+			functionScore=VALUES(functionScore), functionActualScore=VALUES(functionActualScore); ';
+			$sqlQuery .= $sqlCases . ';';
+			//echo $sqlQuery;
+			sql($sqlQuery);
+			
+			
+		}
+		else
+		{
+			echo 'Missing Parameters';
+		}
+		break;
+	case 'getTestSubmissions':
+		if(checkParams(['testID']))
+		{
+			$sqlQuery = "SELECT Accounts.userID, userName FROM Accounts INNER JOIN (SELECT DISTINCT testID, userID FROM TestScores) AS TS ON Accounts.userID = TS.userID WHERE TS.testID = {$inputData['testID']}";
+			$result = sql($sqlQuery)[0];
+			$json = json_encode(array('opCode'=>'submissions', 'users'=>$result));
+			echo $json;
+			return $json;
+		}
+		else
+		{
+			echo 'Missing Paramaters';
+		}
+		break;
+	case 'getScores':
+		if(checkParams(['testID', 'userID']))
+		{
+			$output = array('opCode'=>'scores', 'testID'=>$inputData['testID'], 'userID'=>$inputData['userID'], 'questions'=>[]);
+			
+			$sqlQuery = "SELECT * FROM TestScores WHERE testID = {$inputData['testID']} AND userID = {$inputData['userID']};";
+			$results = sql($sqlQuery)[0];
+			foreach($results as $question)
+			{
+				$sqlCases = "SELECT * FROM TestScoreCases WHERE testID = {$inputData['testID']} AND userID = {$inputData['userID']} AND questionID = {$question['questionID']}";
+				$cases = sql($sqlCases)[0];
+				$newQuest = array_diff_key($question, array_flip(['testID', 'userID']));
+				$newQuest['scores'] = [];
+				foreach($cases as $case)
+				{
+					$newCase = array_diff_key($case, array_flip(['testID', 'userID', 'questionID']));
+					array_push($newQuest['scores'], $newCase);
+				}
+				array_push($output['questions'], $newQuest);
+			}
+
+			$json = json_encode($output);
+			echo $json;
+			return $json;
+			
+		}
+		else
+		{
+			echo 'Missing Parameters';
+		}
+		break;
+	case 'updateScores':
+		if(checkParams(['testID', 'userID', 'questions']))
+		{
+			$sqlQuery = 'INSERT INTO TestScores (testID, userID, questionID, functionActualScore, comment) VALUES ';
+			$sqlCases = 'INSERT INTO TestScoreCases (testID, userID, questionID, input, actualScore) VALUES ';
+
+			//Insert Value Generation
+			foreach($inputData['questions'] as $question)
+			{
+				$sqlQuery .= "({$inputData['testID']}, {$inputData['userID']}, {$question['questionID']}, {$question['functionActualScore']}, {$question['comment']}), ";
+				//$sqlQuery .= "({$inputData['testID']}, {$user['userID']}, {$question['questionID']}), ";
+				foreach($question['scores'] as $case)
+				{
+					$sqlCases .= "({$inputData['testID']}, {$inputData['userID']}, {$question['questionID']}, {$case['input']}, {$case['actualScore']}), ";
+				}
+			}
+
+			//Trim both querys
+			$sqlQuery = rtrim($sqlQuery, ', ');
+			$sqlCases = rtrim($sqlCases, ', ');
+
+			$sqlQuery .= 'ON DUPLICATE KEY UPDATE testID=VALUES(testID), userID=VALUES(userID), questionID=VALUES(questionID), functionName=VALUES(functionName), testFunctionName=VALUES(testFunctionName),
+			functionScore=VALUES(functionScore), functionActualScore=VALUES(functionActualScore); ';
+			$sqlQuery .= $sqlCases;
+			echo $sqlQuery;
+			//sql($sqlQuery);
+
+		}
+		else
+		{
+			echo 'Missing Parameters';
+		}
 		break;
 	default:
 		//Incorrect opCode given, throw curl error
