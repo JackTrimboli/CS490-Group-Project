@@ -23,7 +23,7 @@ getScoringMaterial | testID<br/>
 \>scoringMaterial | testID, users[[userID, answers[[questionID, answer], ...]], ...]<br/>
 sendScores | testID, users[[userID, questions[[questionID, functionName, testFunction, functionScore, scores[[input, expectedOutput, actualOutput, autoScore], ...]], ...]], ...]<br/>
 getTestSubmissions | testID
-\>submissions | 
+\>submissions | users[[userID, userName], ...]
 getScores | testID, userID<br/>
 \>scores | testID, userID, questions[[questionID, functionName, testFunction, functionScore, functionActualScore, scores[[input, expectedOutput, actualOutput, autoScore, actualScore], ...], comment], ...]<br/>
 updateScore | testID, userID, questions[[questionID, functionActualScore, scores[[input, actualScore], ...], ...], comment]<br/>
