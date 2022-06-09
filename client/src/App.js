@@ -8,6 +8,8 @@ import { Routes, Route, HashRouter, Navigate } from 'react-router-dom';
 import QuestionBank from './components/questions/QuestionBank';
 import ExamEditor from './components/exams/ExamEditor';
 import Exam from './components/exams/Exam';
+import Grading from './components/grading/Grading';
+import GradeExam from './components/grading/GradeExam';
 
 function App() {
 
@@ -69,6 +71,23 @@ function App() {
               <ProtectedRoute isLoggedIn={isLoggedIn}>
                 <Navigation user={user} noTabs={true} />
                 <Exam user={user} />
+              </ProtectedRoute>
+            } />
+          <Route
+            path="/Grading"
+            element={
+              <ProtectedRoute isLoggedIn={isLoggedIn}>
+                <Navigation user={user} />
+                <Grading />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/GradeStudent"
+            element={
+              <ProtectedRoute isLoggedIn={isLoggedIn}>
+                <Navigation user={user} />
+                <GradeExam />
               </ProtectedRoute>
             } />
         </Routes>
