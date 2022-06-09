@@ -5,6 +5,9 @@ import Navigation from './components/navigation/Navigation';
 import Landing from './components/landing/Landing';
 import { useState } from 'react';
 import { Routes, Route, HashRouter, Navigate } from 'react-router-dom';
+import QuestionBank from './components/questions/QuestionBank';
+import ExamEditor from './components/exams/ExamEditor';
+import Exam from './components/exams/Exam';
 
 function App() {
 
@@ -22,14 +25,50 @@ function App() {
         <Routes>
           <Route
             index
-            element={isLoggedIn ? <Navigate to="/landing" replace /> : <LoginPage login={handleLogin} />}
+            element={isLoggedIn ? <Navigate to="/Exams" replace /> : <LoginPage login={handleLogin} />}
           />
           <Route
-            path="/landing"
+            path="/Exams"
             element={
               <ProtectedRoute isLoggedIn={isLoggedIn}>
-                <Navigation />
+                <Navigation user={user} />
                 <Landing userObj={user} />
+              </ProtectedRoute>
+            } />
+          <Route
+            path="/Questions"
+            element={
+              <ProtectedRoute isLoggedIn={isLoggedIn}>
+                <Navigation user={user} />
+                <QuestionBank user={user} />
+              </ProtectedRoute>
+
+            }
+          />
+          <Route
+            path="/Grades"
+            element={
+              <ProtectedRoute isLoggedIn={isLoggedIn}>
+                <Navigation user={user} />
+              </ProtectedRoute>
+
+            }
+          />
+          <Route
+            path="/edit-exam"
+            element={
+              <ProtectedRoute isLoggedIn={isLoggedIn}>
+                <Navigation user={user} />
+                <ExamEditor user={user} />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/take-exam"
+            element={
+              <ProtectedRoute isLoggedIn={isLoggedIn}>
+                <Navigation user={user} noTabs={true} />
+                <Exam user={user} />
               </ProtectedRoute>
             } />
         </Routes>

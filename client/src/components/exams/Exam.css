@@ -1,0 +1,14 @@
+.exam-wrapper {
+  width: 100%;
+  margin: 25px auto;
+  display: flex;
+  flex-direction: column;
+
+  align-items: center;
+}
+.exam-code {
+  width: 50%;
+  background-color: #fff;
+  border: 1px solid black;
+  min-height: 200px;
+}
