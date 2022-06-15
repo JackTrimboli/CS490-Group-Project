@@ -5,7 +5,7 @@ EX: opCode | key, key ... | Comments
 login | name, pass<br/>
 \>login | id, name, type<br/>
 \>badLogin |<br/>
-createQuestion | teacherID, text, functionName, testCases[[case, output], ...], difficulty, topic<br/>
+createQuestion | teacherID, text, functionName, testCases[[case, output], ...], difficulty, topic, ?constraint<br/>
 \>newQuestion | questionID<br/>
 getQuestions | ?teacherID, ?testID<br/>
 \>questions | questions[id, text, testCases[[case, output], ...], difficulty, topic]<br/>
@@ -27,3 +27,5 @@ getTestSubmissions | testID<br/>
 getScores | testID, userID<br/>
 \>scores | testID, userID, questions[[questionID, functionName, testFunction, functionScore, functionActualScore, scores[[input, expectedOutput, actualOutput, autoScore, actualScore], ...], comment], ...]<br/>
 updateScore | testID, userID, questions[[questionID, functionActualScore, scores[[input, actualScore], ...], ...], comment]<br/>
+releaseTest | testID<br/>
+releaseGrades | testID<br/>
