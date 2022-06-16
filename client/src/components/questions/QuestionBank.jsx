@@ -12,6 +12,7 @@ import FormLabel from '@mui/material/FormLabel';
 import Radio from '@mui/material/Radio';
 import MenuItem from '@mui/material/MenuItem';
 import Select from 'react-select';
+import { default as MyButton } from '../shared/Button/Button'
 
 
 
@@ -32,9 +33,11 @@ const QuestionBank = (props) => {
     const [open, setOpen] = useState(false);
     const [difficulty, setDifficulty] = useState("easy");
     const [functionName, setFunctionName] = useState("");
-    const [testCases, setTestCases] = useState("");
+    const [testCases, setTestCases] = useState([{ "input": "", "output": "" }])
     const [questionText, setQuestionText] = useState("");
     const [selectedTopic, setSelectedTopic] = useState("");
+    const [constraint, setConstraint] = useState("none");
+    const [isDropdown, setIsDropDown] = useState(true);
 
     useEffect(() => {
         setIsLoading(true);
@@ -57,12 +60,18 @@ const QuestionBank = (props) => {
         { value: 'medium', label: 'Medium' },
         { value: 'hard', label: 'Hard' }
     ]
+
     const override = css`
         opacity: 60%;
         margin-right: 40px;
     `;
     const handleClose = () => {
         setOpen(false);
+        setDifficulty("easy")
+        setFunctionName("")
+        setQuestionText("")
+        setTestCases([{ "input": "", "output": "" }])
+        setSelectedTopic("")
     };
     const handleClick = () => {
         setOpen(true);
@@ -77,11 +86,16 @@ const QuestionBank = (props) => {
     const handleQuestionTextChange = (event) => {
         setQuestionText(event.target.value);
     }
-    const handleTestCaseChange = (event) => {
-        setTestCases(event.target.value);
+    const handleTestCaseChange = (event, i) => {
+        let vals = testCases;
+        vals[i][event.target.name] = event.target.value
+        setTestCases(vals)
     }
     const handleFunctionChange = (event) => {
         setFunctionName(event.target.value);
+    }
+    const handleConstraintChange = (event) => {
+        setConstraint(event.target.value)
     }
 
     const getTopics = () => {
@@ -105,7 +119,13 @@ const QuestionBank = (props) => {
 
 
     const handleSubmit = () => {
-
+        let tests = []
+        for (let i = 0; i < testCases.length; i++) {
+            const row = []
+            row.push(testCases[i]["input"])
+            row.push(testCases[i]["output"])
+            tests.push(row)
+        }
         const createQuestion = {
             method: 'POST',
             url: "https://afsaccess4.njit.edu/~jdt34/CreateQuestion.php",
@@ -114,9 +134,10 @@ const QuestionBank = (props) => {
                 teacherID: parseInt(props.user.id),
                 question: questionText,
                 functionName: functionName,
-                testCases: [["1, 2", "3"], ["2, 2", "4"]],
+                testCases: tests,
                 difficulty: difficulty,
                 topic: selectedTopic,
+                constraint: constraint
             }
         };
 
@@ -140,24 +161,20 @@ const QuestionBank = (props) => {
         }).catch((err) => {
             console.log(err);
         });
-        setDifficulty("easy")
-        setFunctionName("")
-        setQuestionText("")
-        setTestCases("")
-        setSelectedTopic("")
+        getTopics();
         handleClose();
+    }
+    const handleAddTestCase = () => {
+        setTestCases([...testCases, { "input": "", "output": "" }])
+    }
+    const toggleDropdown = () => {
+        if (isDropdown)
+            setIsDropDown(false)
+        else
+            setIsDropDown(true)
     }
 
 
-
-    // if (isLoading) {
-    //     return (
-    //         <div className='questions-loader'>
-    //             <PacmanLoader css={override} color='#2e8bc0' size={50} />
-    //             <h3>Getting your questions...</h3>
-    //         </div>
-    //     )
-    // } else {
     return (
         <div className="questions-wrapper">
             <Dialog open={open} onClose={handleClose}>
@@ -190,17 +207,35 @@ const QuestionBank = (props) => {
                         rows={4}
                         variant="standard"
                     />
-                    <TextField
-                        autoFocus
-                        margin="normal"
-                        id="name"
-                        label="Test Cases"
-                        helperText="In the format [['1', '2', '3'], ['1']]"
-                        onChange={handleTestCaseChange}
-                        type="text"
-                        fullWidth
-                        variant="standard"
-                    />
+                    <div>
+                        <FormLabel style={{ marginTop: '10px' }} id="demo-radio-buttons-group-label">Test Cases</FormLabel>
+                        {testCases.map((element, index) => {
+                            return (
+                                <div style={{ display: 'flex', marginBottom: '10px', justifyContent: "space-around" }}>
+                                    <TextField
+                                        autoFocus
+                                        margin="normal"
+                                        name="input"
+                                        // value={element.input || ""}
+                                        label={"Input #" + parseInt(index + 1)}
+                                        onChange={(e) => handleTestCaseChange(e, index)}
+                                        type="text"
+                                        variant="standard"
+                                    /><TextField
+                                        autoFocus
+                                        margin="normal"
+                                        name="output"
+                                        // value={element.output || ""}
+                                        label={"Output #" + parseInt(index + 1)}
+                                        onChange={(e) => handleTestCaseChange(e, index)}
+                                        type="text"
+                                        variant="standard"
+                                    />
+                                </div>
+                            )
+                        })}
+                        <Button fullWidth onClick={handleAddTestCase}>Add TestCase</Button>
+                    </div>
                     <FormLabel id="demo-radio-buttons-group-label">Difficulty</FormLabel>
                     <RadioGroup
                         aria-labelledby="demo-radio-buttons-group-label"
@@ -212,24 +247,49 @@ const QuestionBank = (props) => {
                         <FormControlLabel value="medium" control={<Radio />} label="Medium" />
                         <FormControlLabel value="hard" control={<Radio />} label="Hard" />
                     </RadioGroup>
-                    <TextField
-                        id="outlined-select-currency-native"
-                        margin='normal'
-                        label="Question Topic"
-                        select
-                        value={selectedTopic}
-                        onChange={handleTopicChange}
-                        helperText="Select the topic this question falls under"
-                        fullWidth
+                    <FormLabel id="demo-radio-buttons-group-label">Contraints</FormLabel>
+                    <RadioGroup
+                        aria-labelledby="demo-radio-buttons-group-label"
+                        value={constraint}
+                        onChange={handleConstraintChange}
+                        name="radio-buttons-group"
                     >
-                        {topics.map((option, index) => (
-                            <MenuItem key={topics[index]} value={topics[index]}>
-                                {topics[index]}
-                            </MenuItem>
-                        ))}
-                        {/* <MenuItem key="10" value="10">ten</MenuItem>
-                        <MenuItem key="20" value="20">twenty</MenuItem> */}
-                    </TextField>
+                        <FormControlLabel value="none" control={<Radio />} label="None" />
+                        <FormControlLabel value="for" control={<Radio />} label="For Loop" />
+                        <FormControlLabel value="while" control={<Radio />} label="While Loop" />
+                        <FormControlLabel value="recursion" control={<Radio />} label="Recursion" />
+                    </RadioGroup>
+                    {isDropdown ?
+                        <TextField
+                            id="outlined-select-currency-native"
+                            margin='normal'
+                            label="Question Topic"
+                            select
+                            value={selectedTopic}
+                            onChange={handleTopicChange}
+                            helperText="Select the topic this question falls under"
+                            fullWidth
+                        >
+                            {topics.map((option, index) => (
+                                <MenuItem key={topics[index]} value={topics[index]}>
+                                    {topics[index]}
+                                </MenuItem>
+                            ))}
+                        </TextField>
+                        :
+                        <TextField
+                            autoFocus
+                            margin="normal"
+                            id="name"
+                            label="Enter Topic"
+                            value={selectedTopic}
+                            onChange={handleTopicChange}
+                            type="text"
+                            variant="standard"
+                            fullWidth
+                        />
+                    }
+                    <Button onClick={toggleDropdown}>{isDropdown ? <p>Create new topic</p> : <p>View dropdown</p>}</Button>
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleClose}>Cancel</Button>
@@ -243,7 +303,7 @@ const QuestionBank = (props) => {
                     <Select options={diffOptions} />
                     <Select options={topics} />
                 </div>
-                <AddButton clickFunc={handleClick} />
+                <MyButton text="Add New Question" clickFunc={handleClick} />
             </div>
             {isLoading ?
                 <div className='questions-loader'>

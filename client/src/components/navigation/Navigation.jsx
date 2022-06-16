@@ -7,6 +7,10 @@ import Button from '../shared/Button/Button';
 
 const Navigation = (props) => {
 
+    const logout = () => {
+        window.location.reload()
+    }
+
     return (
         <div className='navbar'>
             <div className='navbar-content'>
@@ -18,7 +22,7 @@ const Navigation = (props) => {
                         <NavLinkGroup isTeacher={props.user.type} /> : null
                     }
                 </div>
-                {!props.noTabs ? <Button text="Logout" /> : null}
+                {!props.noTabs ? <Button text="Logout" clickFunc={logout} /> : null}
             </div>
         </div>
     )

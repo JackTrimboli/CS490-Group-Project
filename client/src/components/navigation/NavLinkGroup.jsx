@@ -9,13 +9,12 @@ const NavLinkGroup = (props) => {
             <div className='Navlink-group'>
                 <NavLink route='/Exams' text="Exams" />
                 <NavLink route='/Questions' text="Questions" />
-                {/* <NavLink route='/Grading' text="Grading" /> */}
             </div>)
     }
     return (
         <div className='Navlink-group'>
             <NavLink route='/Exams' text="Exams" />
-            <NavLink route='/Grades' text="Grades" />
+            {/* <NavLink route='/Grades' text="Grades" /> */}
         </div>);
 }
 

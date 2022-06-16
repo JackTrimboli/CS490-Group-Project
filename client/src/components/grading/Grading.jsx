@@ -1,6 +1,7 @@
 import { React, useState, useEffect } from 'react'
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
+import Button from '../shared/Button/Button';
 import './Grading.css'
 
 const Grading = (props) => {
@@ -33,18 +34,24 @@ const Grading = (props) => {
 
     return (
         <div className='grading-wrapper'>
-            <div>
-                <h2>Grading</h2>
+            <div className='header'>
+                <h2>Submissions for Exam #{testID}</h2>
+                <p>The following represent all current submissions for this exam. To modfiy the submission of specific student, hit 'edit grades'</p>
             </div>
             <div className='submission-list'>
-                <table>
-                    <tbody>
+                <table className='submission-table'>
+                    <tbody >
+                        <tr>
+                            <th>User ID</th>
+                            <th>Name</th>
+                            <th>Edit</th>
+                        </tr>
                         {students.map((res) => {
                             return (
                                 <tr>
                                     <td>{res.userID}</td>
                                     <td>{res.userName}</td>
-                                    <td><Link to={"/GradeStudent/?id=" + testID + "&userID=" + res.userID}>Edit Grades</Link></td>
+                                    <td><Link to={"/GradeStudent/?id=" + testID + "&userID=" + res.userID}><Button text="Edit Grade" /></Link></td>
                                 </tr>
                             )
                         })}

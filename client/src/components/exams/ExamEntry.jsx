@@ -14,7 +14,7 @@ const ExamEntry = (props) => {
         redirect = '/edit-exam/?id=' + props.examID;
 
     let gradeLink;
-    if (props.student)
+    if (props.isStudent)
         gradeLink = '/Grades/?id=' + props.examID;
     else
         gradeLink = '/Grading/?id=' + props.examID;
@@ -27,7 +27,7 @@ const ExamEntry = (props) => {
             headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET,PUT,POST,DELETE,PATCH,OPTIONS' },
             data: { testID: parseInt(props.examID) }
         }
-        console.log('fired')
+        console.log('autograde fired')
         axios.request(grade).then((response) => {
             if (!!response.data) {
                 console.log(response.data)
@@ -37,11 +37,73 @@ const ExamEntry = (props) => {
         });
     }
 
+    const releaseTest = () => {
+        const test = {
+            method: 'POST',
+            url: "https://afsaccess4.njit.edu/~jdt34/ReleaseTest.php",
+            headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET,PUT,POST,DELETE,PATCH,OPTIONS' },
+            data: { testID: parseInt(props.examID) }
+        }
+        axios.request(test).then((response) => {
+            if (!!response.data) {
+                console.log(response.data)
+            }
+        }).catch((err) => {
+            console.log(err);
+        });
+
+    }
+
+    const releaseGrades = () => {
+        const grading = {
+            method: 'POST',
+            url: "https://afsaccess4.njit.edu/~jdt34/ReleaseGrade.php",
+            headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET,PUT,POST,DELETE,PATCH,OPTIONS' },
+            data: { testID: parseInt(props.examID) }
+        }
+        axios.request(grading).then((response) => {
+            if (!!response.data) {
+                console.log(response.data)
+            }
+        }).catch((err) => {
+            console.log(err);
+        });
+
+
+    }
+
     return (
         <tr className={`exam-entry ${props.odd ? "odd" : "even"}`}>
             <th className='exam-id'>#{props.examID}</th>
             <th>{props.name}</th>
-            <td className='edit-cell'>{!props.isStudent ? <div> <Link className='edit-link' to={redirect} ><EditIcon className='edit-icon'>Edit</EditIcon></Link> <Link to={gradeLink}><Button text="Grade" /></Link> <Button text="Auto" clickFunc={autoGrade} /> </div> : <Link className='edit-link' to={redirect}><Button text="TAKE EXAM" /></Link>}</td>
+            <td className='edit-cell'>
+                {!props.isStudent ? //Teacher Exam Entry
+                    <div>
+                        <Link className='edit-link' to={redirect} >
+                            <EditIcon className='edit-icon'>Edit</EditIcon>
+                        </Link>
+                        <Link to={gradeLink}>
+                            <Button text="Grade" />
+                        </Link>
+                        {props.exam.autoGrading === "1" && props.exam.gradesReleased === "0" ? <Button disabled text="Auto" clickFunc={autoGrade} /> : <Button text="Auto" clickFunc={autoGrade} />}
+                        {props.exam.testReleased === "1" && props.exam.autoGrade === "0" && props.exam.gradesReleased === "0" ? <Button disabled text="Release Test" clickFunc={releaseTest} /> : <Button text="Release Test" clickFunc={releaseTest} />}
+                        {props.exam.gradesReleased === "1" ? <Button disabled text="Release Grades" clickFunc={releaseGrades} /> : <Button text="Release Grades" clickFunc={releaseGrades} />}
+                    </div> : //Student Exam Entry
+                    <div>
+                        {props.exam.autoGrading === "1" && props.exam.gradesReleased === "1" ?
+                            <Link className='edit-link' to={gradeLink}>
+                                <Button text="SEE GRADES" />
+                            </Link> :
+                            <Button disabled text="SEE GRADES" />
+                        }
+                        {props.exam.testReleased === "1" && props.exam.autoGrading === "0" ?
+                            <Link className='edit-link' to={redirect}>
+                                <Button text="TAKE EXAM" />
+                            </Link> :
+                            <Button text="TAKE EXAM" disabled />
+                        }
+                    </div>}
+            </td>
         </tr>
 
     )
