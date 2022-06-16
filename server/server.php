@@ -1,16 +1,17 @@
 <?php
 define("debug", false);
 define("logging", true);
+$logIgnoreOpCodes = ['login', 'getQuestions', 'getTest', 'getTests'];
 $json = file_get_contents('php://input');
 $inputData = json_decode($json, true);
 if(debug && !isset($inputData['opCode']))
 {
 	echo 'Debug Mode<br>';
-	$inputData['opCode'] = 'getScores';
+	$inputData['opCode'] = 'updateScore';
 	$inputData['teacherID'] = 2;
-	$inputData['testID'] = 4;
-	$inputData['userID'] = 1;
-	$inputData['questions'] = [array('ID'=>27, 'answer'=>'testing2')];
+	$inputData['testID'] = 21;
+	$inputData['userID'] = 3;
+	$inputData['questions'] = [array("ID"=>67,'functionActualScore'=>0.000,'comment'=>'\"\"','constraintActualScore'=>0.0, 'scores'=>[])];
 
 	//login
 	$inputData['name'] = 'adam';
@@ -22,6 +23,7 @@ if(debug && !isset($inputData['opCode']))
 	$inputData['testCases'] = [['2', '4'], ['4', '8']];
 	$inputData['difficulty'] = 'Medium';
 	$inputData['topic'] = 'For Loops';
+	$inputData['constraint'] = 'none';
 
 	$inputData['name'] = 'Test 1';
 	//$inputData['questions'] = [array('id'=>27, 'value'=>25)];
@@ -31,9 +33,13 @@ if(debug && !isset($inputData['opCode']))
 }
 else if(logging)
 {
+	if(!in_array($inputData['opCode'], $logIgnoreOpCodes))
+		$file = 'logs/log.txt';
+	else
+		$file = 'logs/unusedLog.txt';
 	date_default_timezone_set('America/New_York');
 	$logEntry = date('l jS \of F Y h:i:s A') . "\n" . $json . "\n\n";
-	file_put_contents('logs/log.txt', $logEntry, FILE_APPEND | LOCK_EX);
+	file_put_contents($file, $logEntry, FILE_APPEND | LOCK_EX);
 }
 
 $opCode = -1;
@@ -72,10 +78,10 @@ switch($opCode)
 		break;
 	case 'createQuestion':
 		//Check that all data is here
-		if(checkParams(['teacherID', 'text', 'functionName', 'testCases', 'difficulty', 'topic']))
+		if(checkParams(['teacherID', 'text', 'functionName', 'testCases', 'difficulty', 'topic', 'constraint']))
 		{
-			$sqlQuery = 'INSERT INTO Questions (teacherID, questionText, functionName, difficulty, topic) 
-			VALUES (' . sqlList(['teacherID', 'text', 'functionName', 'difficulty', 'topic']) . ');
+			$sqlQuery = 'INSERT INTO Questions (teacherID, questionText, functionName, difficulty, topic, funcConstraint) 
+			VALUES (' . sqlList(['teacherID', 'text', 'functionName', 'difficulty', 'topic', 'constraint']) . ');
 			SELECT LAST_INSERT_ID() AS questionID;';
 			$result = sql($sqlQuery)[1][0];
 			$sqlCases = 'INSERT INTO QuestionCases (questionID, input, output)
@@ -126,7 +132,8 @@ switch($opCode)
 			}
 			else
 			{
-				$modRow = array_diff_key($row, array_flip(['input', 'output']));
+				$modRow = array_diff_key($row, array_flip(['input', 'output', 'funcConstraint']));
+				$modRow['constraint'] = $row['funcConstraint'];
 				$modRow['testCases'] = [[$row['input'], $row['output']]];
 				array_push($output['questions'], $modRow);
 				array_push($questionIndex, $row['questionID']);
@@ -255,7 +262,7 @@ switch($opCode)
 			$sqlQuests = "";
 			foreach($testIDs as $id)
 			{
-				$sqlQuests .= "SELECT Q.questionID, teacherID, questionText, functionName, difficulty, topic, questionValue, input, output 
+				$sqlQuests .= "SELECT Q.questionID, teacherID, questionText, functionName, difficulty, topic, funcConstraint, questionValue, input, output 
 				FROM Questions AS Q INNER JOIN TestQuestions AS TQ ON Q.questionID = TQ.questionID INNER JOIN QuestionCases as QC ON Q.questionID = QC.questionID WHERE TQ.testID = $id;";
 			}
 			$AllQuestions = sql($sqlQuests);
@@ -276,7 +283,8 @@ switch($opCode)
 					}
 					else
 					{
-						$modRow = array_diff_key($question, array_flip(['input', 'output']));
+						$modRow = array_diff_key($question, array_flip(['input', 'output', 'funcConstraint']));
+						$modRow['constraint'] = $question['funcConstraint'];
 						$modRow['testCases'] = [[$question['input'], $question['output']]];
 						array_push($results[$i]['questions'], $modRow);
 						array_push($questIndex, $question['questionID']);
@@ -322,8 +330,8 @@ switch($opCode)
 	case 'getScoringMaterial':
 		if(checkParams('testID'))
 		{
-			$sqlQuery = "SELECT userID, questionID, answer FROM TestScores WHERE testID = {$inputData['testID']}";
-			$results = sql($sqlQuery)[0];
+			$sqlQuery = "UPDATE Tests SET autoGrading = 1 WHERE testID = {$inputData['testID']}; SELECT userID, questionID, answer FROM TestScores WHERE testID = {$inputData['testID']}";
+			$results = sql($sqlQuery)[1];
 			
 			$users = [];
 			$userIndexs = [];
@@ -356,16 +364,16 @@ switch($opCode)
 	case 'sendScores':
 		if(checkParams(['testID', 'users']))
 		{
-			$sqlQuery = 'INSERT INTO TestScores (testID, userID, questionID, functionName, testFunctionName, functionScore, functionActualScore) VALUES ';
+			$sqlQuery = 'INSERT INTO TestScores (testID, userID, questionID, functionName, testFunctionName, functionScore, functionActualScore, constraintScore, constraintActualScore) VALUES ';
 			$sqlCases = 'INSERT INTO TestScoreCases (testID, userID, questionID, input, expectedOutput, actualOutput, autoScore, actualScore) VALUES ';
 
 			//Insert Value Generation
 			foreach($inputData['users'] as $user)
 			{
-				foreach($user['questions'][0] as $question)
+				foreach($user['questions'] as $question)
 				{
 					$sqlQuery .= "({$inputData['testID']}, {$user['userID']}, {$question['questionID']}, '{$question['functionName']}', '{$question['testFunction']}', {$question['functionScore']},
-					{$question['functionScore']}), ";
+					{$question['functionScore']}, {$question['constraintScore']}, {$question['constraintScore']}), ";
 					//$sqlQuery .= "({$inputData['testID']}, {$user['userID']}, {$question['questionID']}), ";
 					foreach($question['scores'] as $case)
 					{
@@ -382,8 +390,9 @@ switch($opCode)
 			$sqlQuery .= ' ON DUPLICATE KEY UPDATE testID=VALUES(testID), userID=VALUES(userID), questionID=VALUES(questionID), functionName=VALUES(functionName), testFunctionName=VALUES(testFunctionName),
 			functionScore=VALUES(functionScore), functionActualScore=VALUES(functionActualScore); ';
 			$sqlQuery .= $sqlCases . ';';
-			//echo $sqlQuery;
-			sql($sqlQuery);
+			echo $sqlQuery;
+			return $sqlQuery;
+			//sql($sqlQuery);
 			
 			
 		}
@@ -411,7 +420,9 @@ switch($opCode)
 		{
 			$output = array('opCode'=>'scores', 'testID'=>$inputData['testID'], 'userID'=>$inputData['userID'], 'questions'=>[]);
 			
-			$sqlQuery = "SELECT * FROM TestScores WHERE testID = {$inputData['testID']} AND userID = {$inputData['userID']};";
+			$sqlQuery = "SELECT TS.testID, TS.questionID, userID, answer, TS.functionName, testFunctionName, functionScore, functionActualScore, comment, questionValue, questionText, difficulty, topic, funcConstraint,
+			constraintScore, constraintActualScore FROM TestScores AS TS INNER JOIN TestQuestions AS TQ ON
+			TS.questionID = TQ.questionID AND TQ.testID = TS.testID INNER JOIN Questions AS Q ON Q.questionID = TS.questionID WHERE TS.testID = {$inputData['testID']} AND TS.userID = {$inputData['userID']};";
 			$results = sql($sqlQuery)[0];
 			foreach($results as $question)
 			{
@@ -437,32 +448,24 @@ switch($opCode)
 			echo 'Missing Parameters';
 		}
 		break;
-	case 'updateScores':
+	case 'updateScore':
 		if(checkParams(['testID', 'userID', 'questions']))
 		{
-			$sqlQuery = 'INSERT INTO TestScores (testID, userID, questionID, functionActualScore, comment) VALUES ';
-			$sqlCases = 'INSERT INTO TestScoreCases (testID, userID, questionID, input, actualScore) VALUES ';
-
+			$sqlQuery = '';
 			//Insert Value Generation
 			foreach($inputData['questions'] as $question)
 			{
-				$sqlQuery .= "({$inputData['testID']}, {$inputData['userID']}, {$question['questionID']}, {$question['functionActualScore']}, {$question['comment']}), ";
-				//$sqlQuery .= "({$inputData['testID']}, {$user['userID']}, {$question['questionID']}), ";
+				$sqlQuery .= " UPDATE TestScores SET functionActualScore = {$question['functionActualScore']}, comment = \"{$question['comment']}\" WHERE testID =
+				{$inputData['testID']} AND userID = {$inputData['userID']} AND questionID = {$question['questionID']};";
 				foreach($question['scores'] as $case)
 				{
-					$sqlCases .= "({$inputData['testID']}, {$inputData['userID']}, {$question['questionID']}, {$case['input']}, {$case['actualScore']}), ";
+					$sqlQuery .= " Update TestScoreCases SET actualScore = {$case['actualScore']} WHERE testID = {$inputData['testID']} AND userID = {$inputData['userID']} AND questionID = {$question['questionID']}
+					AND input = \"{$case['input']}\";";
 				}
 			}
 
-			//Trim both querys
-			$sqlQuery = rtrim($sqlQuery, ', ');
-			$sqlCases = rtrim($sqlCases, ', ');
-
-			$sqlQuery .= 'ON DUPLICATE KEY UPDATE testID=VALUES(testID), userID=VALUES(userID), questionID=VALUES(questionID), functionName=VALUES(functionName), testFunctionName=VALUES(testFunctionName),
-			functionScore=VALUES(functionScore), functionActualScore=VALUES(functionActualScore); ';
-			$sqlQuery .= $sqlCases;
-			echo $sqlQuery;
-			//sql($sqlQuery);
+			//echo $sqlQuery;
+			sql($sqlQuery);
 
 		}
 		else
@@ -470,6 +473,27 @@ switch($opCode)
 			echo 'Missing Parameters';
 		}
 		break;
+	case 'releaseTest':
+		if(checkParams(['testID']))
+		{
+			$sqlQuery = "UPDATE Tests SET testReleased = 1 WHERE testID = {$inputData['testID']}";
+			sql($sqlQuery);
+		}
+		else
+		{
+			echo 'Missing Parameters';
+		}
+		break;
+	case 'releaseGrades':
+		if(checkParams(['testID']))
+		{
+			$sqlQuery = "UPDATE Tests SET gradesReleased = 1 WHERE testID = {$inputData['testID']}";
+			sql($sqlQuery);
+		}
+		else
+		{
+			echo 'Missing Parameters';
+		}
 	default:
 		//Incorrect opCode given, throw curl error
 		break;
