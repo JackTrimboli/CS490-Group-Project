@@ -22,7 +22,7 @@ const Question = (props) => {
             <td onClick={() => props.clickFunc(props.question, props.type)} className='question-text'>{props.text}</td>
             <td onClick={() => props.clickFunc(props.question, props.type)} className={`question-difficulty ${diffColor}`}>{diffColor}</td>
             <td onClick={() => props.clickFunc(props.question, props.type)} className='question-topic'><b>{props.topic}</b></td>
-            {props.hasPoints ? <td><TextField size="small" onChange={(e) => props.handleChange(e.target.value, props.question)} label="pts" defaultValue={props.question.questionValue} /></td> : null}
+            {props.hasPoints ? <td><TextField size="small" type="number" onChange={(e) => props.handleChange(e.target.value, props.question)} label="pts" defaultValue={props.question.questionValue} /></td> : null}
         </tr>
     )
 }

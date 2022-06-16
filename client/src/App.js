@@ -52,6 +52,7 @@ function App() {
             element={
               <ProtectedRoute isLoggedIn={isLoggedIn}>
                 <Navigation user={user} />
+                <GradeExam isStudent={true} user={user} />
               </ProtectedRoute>
 
             }

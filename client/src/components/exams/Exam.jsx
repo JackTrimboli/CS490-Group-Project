@@ -8,6 +8,7 @@ import 'prismjs/components/prism-clike';
 import 'prismjs/components/prism-python';
 import 'prismjs/themes/prism.css'; //Example style, you can use another
 import './Exam.css'
+import { default as MyButton } from '../shared/Button/Button';
 
 const Exam = (props) => {
 
@@ -97,6 +98,14 @@ const Exam = (props) => {
     return (
         <div className='exam-wrapper'>
             <h2>{testData.testName}</h2>
+            <div className='minimap'>
+                {questions.map((each, index) => {
+                    return (
+                        <button onClick={() => setCurrentQuestion(questions[index])}>Question #{index + 1}</button>
+                    )
+                })}
+            </div>
+            <h4>Question {questions.indexOf(currentQuestion) + 1} out of {questions.length}</h4>
             <p>{currentQuestion.questionText} ({currentQuestion.questionValue} pts.)</p>
             <Editor
 
