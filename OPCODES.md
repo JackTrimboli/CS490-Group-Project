@@ -21,11 +21,11 @@ getTest | testID | returns test along with questions<br/>
 sendTest | testID, userID, questions[[ID, answer], ...] | Used to send a test questions answers when a student finishes the test<br/>
 getScoringMaterial | testID<br/>
 \>scoringMaterial | testID, users[[userID, answers[[questionID, answer], ...]], ...]<br/>
-sendScores | testID, users[[userID, questions[[questionID, functionName, testFunction, functionScore, constraintUsed, scores[[input, expectedOutput, actualOutput, autoScore], ...]], ...]], ...]<br/>
+sendScores | testID, users[[userID, questions[[questionID, functionName, testFunction, functionScore, constraintScore, scores[[input, expectedOutput, actualOutput, autoScore], ...]], ...]], ...]<br/>
 getTestSubmissions | testID<br/>
 \>submissions | users[[userID, userName], ...]<br/>
 getScores | testID, userID<br/>
-\>scores | testID, userID, questions[[questionID, functionName, testFunction, functionScore, functionActualScore, scores[[input, expectedOutput, actualOutput, autoScore, actualScore], ...], comment], ...]<br/>
+\>scores | testID, userID, questions[[questionID, functionName, testFunction, functionScore, functionActualScore, constraintScore, constraintActualScore, scores[[input, expectedOutput, actualOutput, autoScore, actualScore], ...], comment], ...]<br/>
 updateScore | testID, userID, questions[[questionID, functionActualScore, scores[[input, actualScore], ...], ...], comment]<br/>
 releaseTest | testID<br/>
 releaseGrades | testID<br/>
