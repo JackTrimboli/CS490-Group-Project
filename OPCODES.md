@@ -26,6 +26,6 @@ getTestSubmissions | testID<br/>
 \>submissions | users[[userID, userName], ...]<br/>
 getScores | testID, userID<br/>
 \>scores | testID, userID, questions[[questionID, functionName, testFunction, functionScore, functionActualScore, constraintScore, constraintActualScore, scores[[input, expectedOutput, actualOutput, autoScore, actualScore], ...], comment], ...]<br/>
-updateScore | testID, userID, questions[[questionID, functionActualScore, scores[[input, actualScore], ...], ...], comment]<br/>
+updateScore | testID, userID, questions[[questionID, functionActualScore, constraintActualScore, scores[[input, actualScore], ...], ...], comment]<br/>
 releaseTest | testID<br/>
 releaseGrades | testID<br/>
