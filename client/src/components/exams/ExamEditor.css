@@ -1,0 +1,30 @@
+.exam-editor-wrapper {
+  width: 90%;
+  margin: 25px auto;
+}
+.exam-editor-info {
+  text-align: center;
+  color: gray;
+  margin-bottom: 10px;
+}
+.splitscreen {
+  width: 100%;
+  display: flex;
+}
+.exam-table {
+  width: 100%;
+}
+.exam-table-body {
+  width: 100%;
+}
+.exam-questions {
+  width: 50%;
+
+  margin-right: 5px;
+  border-right: 1px solid rgb(191, 191, 191);
+}
+.remaining-questions {
+  width: 50%;
+  margin-left: 5px;
+  border-left: 1px solid rgb(191, 191, 191);
+}

@@ -1,0 +1,18 @@
+.Navlink-link {
+  text-decoration: none;
+  height: 100%;
+  width: 100px;
+  text-align: center;
+  border-bottom: 3.5px solid #2e8bc0;
+  margin: 0 20px;
+  padding: 0;
+}
+.Navlink-text {
+  color: #2e8bc0;
+}
+.Navlink-group {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  margin-left: 20%;
+}
