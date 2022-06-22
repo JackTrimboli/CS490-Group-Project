@@ -7,7 +7,7 @@ login | name, pass<br/>
 \>badLogin |<br/>
 createQuestion | teacherID, text, functionName, testCases[[case, output], ...], difficulty, topic, ?constraint<br/>
 \>newQuestion | questionID<br/>
-getQuestions | ?teacherID, ?testID<br/>
+getQuestions | ?teacherID, ?testID, ?difficulty, ?topic, ?keyword<br/>
 \>questions | questions[id, text, testCases[[case, output], ...], difficulty, topic]<br/>
 getTopics | ?teacherID<br/>
 \>topics | topics[]<br/>
