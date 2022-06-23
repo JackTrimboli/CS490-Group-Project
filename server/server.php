@@ -7,9 +7,9 @@ $inputData = json_decode($json, true);
 if(debug && !isset($inputData['opCode']))
 {
 	echo 'Debug Mode<br>';
-	$inputData['opCode'] = 'updateScore';
-	$inputData['teacherID'] = 2;
-	$inputData['testID'] = 21;
+	$inputData['opCode'] = 'getQuestions';
+	$inputData['teacherID'] = 6;
+	//$inputData['testID'] = 23;
 	$inputData['userID'] = 3;
 	$inputData['questions'] = [array("ID"=>67,'functionActualScore'=>0.000,'comment'=>'\"\"','constraintActualScore'=>0.0, 'scores'=>[])];
 
@@ -21,19 +21,20 @@ if(debug && !isset($inputData['opCode']))
 	$inputData['text'] = 'Make a function called double that doubles an int value.';
 	$inputData['functionName'] = 'double';
 	$inputData['testCases'] = [['2', '4'], ['4', '8']];
-	$inputData['difficulty'] = 'Medium';
-	$inputData['topic'] = 'For Loops';
+	//$inputData['difficulty'] = 'medium';
+	$inputData['topic'] = 'Logical';
 	$inputData['constraint'] = 'none';
 
+	$inputData['keyword'] = 'Sum';
 	$inputData['name'] = 'Test 1';
 	//$inputData['questions'] = [array('id'=>27, 'value'=>25)];
 	
 	
 	//echo json_encode($inputData);
 }
-else if(logging)
+if(logging)
 {
-	if(!in_array($inputData['opCode'], $logIgnoreOpCodes))
+	if(true || !in_array($inputData['opCode'], $logIgnoreOpCodes))
 		$file = 'logs/log.txt';
 	else
 		$file = 'logs/unusedLog.txt';
@@ -80,6 +81,7 @@ switch($opCode)
 		//Check that all data is here
 		if(checkParams(['teacherID', 'text', 'functionName', 'testCases', 'difficulty', 'topic', 'constraint']))
 		{
+			$inputData['functionName'] = str_replace(' ', '', $inputData['functionName']);
 			$sqlQuery = 'INSERT INTO Questions (teacherID, questionText, functionName, difficulty, topic, funcConstraint) 
 			VALUES (' . sqlList(['teacherID', 'text', 'functionName', 'difficulty', 'topic', 'constraint']) . ');
 			SELECT LAST_INSERT_ID() AS questionID;';
@@ -105,16 +107,40 @@ switch($opCode)
 	case 'getQuestions':
 		$sqlQuery = "SELECT * FROM QuestionCases INNER JOIN Questions ON Questions.questionID = QuestionCases.questionID";
 		$added = False;
-		if(checkParams('teacherID'))
-			$sqlQuery .= " WHERE teacherID = {$inputData['teacherID']}";
-			$added = True;
-		if(checkParams('testID'))
+		
+		$added = false;
+		foreach(['teacherID', 'testID', 'difficulty', 'topic', 'keyword'] as $param)
 		{
-			if(!$added)
-				$sqlQuery .= ' WHERE';
-			else
-				$sqlQuery .= ' AND';
-			$sqlQuery .= " QuestionCases.questionID IN (SELECT TestQuestions.questionID FROM TestQuestions WHERE testID = {$inputData['testID']})";
+			if(checkParams($param))
+			{
+				//Check for WHERE or AND
+				if(!$added)
+				{
+					$sqlQuery .= ' WHERE';
+					$added = true;
+				}
+				else
+					$sqlQuery .= ' AND';
+
+				switch($param)
+				{
+					case 'teacherID':
+						$sqlQuery .= " teacherID = {$inputData['teacherID']}";
+						break;
+					case 'testID':
+						$sqlQuery .= " QuestionCases.questionID IN (SELECT TestQuestions.questionID FROM TestQuestions WHERE testID = {$inputData['testID']})";
+						break;
+					case 'difficulty':
+						$sqlQuery .= " difficulty = '{$inputData['difficulty']}'";
+						break;
+					case 'topic':
+						$sqlQuery .= " topic = '{$inputData['topic']}'";
+						break;
+					case 'keyword':
+						$sqlQuery .= " (questionText LIKE '%{$inputData['keyword']}%' OR functionName LIKE '%{$inputData['keyword']}%')";
+						break;
+				}
+			}
 		}
 		$sqlQuery .= ';';
 
@@ -390,9 +416,9 @@ switch($opCode)
 			$sqlQuery .= ' ON DUPLICATE KEY UPDATE testID=VALUES(testID), userID=VALUES(userID), questionID=VALUES(questionID), functionName=VALUES(functionName), testFunctionName=VALUES(testFunctionName),
 			functionScore=VALUES(functionScore), functionActualScore=VALUES(functionActualScore); ';
 			$sqlQuery .= $sqlCases . ';';
-			echo $sqlQuery;
-			return $sqlQuery;
-			//sql($sqlQuery);
+			//echo $sqlQuery;
+			//return $sqlQuery;
+			sql($sqlQuery);
 			
 			
 		}
@@ -455,12 +481,21 @@ switch($opCode)
 			//Insert Value Generation
 			foreach($inputData['questions'] as $question)
 			{
-				$sqlQuery .= " UPDATE TestScores SET functionActualScore = {$question['functionActualScore']}, comment = \"{$question['comment']}\" WHERE testID =
+				foreach(['constraintActualScore', 'functionActualScore'] as $param)
+				{
+					$question[$param] = (float)$question[$param];
+				}
+				$sqlQuery .= " UPDATE TestScores SET functionActualScore = {$question['functionActualScore']}, comment = '{$question['comment']}', constraintActualScore =
+				{$question['constraintActualScore']} WHERE testID =
 				{$inputData['testID']} AND userID = {$inputData['userID']} AND questionID = {$question['questionID']};";
 				foreach($question['scores'] as $case)
 				{
+					foreach(['actualScore'] as $param)
+					{
+						$case[$param] = (float)$case[$param];
+					}
 					$sqlQuery .= " Update TestScoreCases SET actualScore = {$case['actualScore']} WHERE testID = {$inputData['testID']} AND userID = {$inputData['userID']} AND questionID = {$question['questionID']}
-					AND input = \"{$case['input']}\";";
+					AND input = '{$case['input']}';";
 				}
 			}
 
@@ -546,7 +581,11 @@ function sql($query)
 	$sqlUser = rtrim(fgets($connInfo), "\r\n");
 	$sqlPass = rtrim(fgets($connInfo), "\r\n");
 	$sqlDB = 'acp47';
-	
+
+	//Do sqlQuery string modification to prevent certain problems
+	//$sqlQuery = str_replace("'", "''", $sqlQuery);
+	//$sqlQuery = str_replace("\"", "\\\"", $sqlQuery);
+
 	$conn = new mysqli($sqlServer, $sqlUser, $sqlPass, $sqlDB);
 	if ($conn->connect_error)
 	{
