@@ -1,0 +1,26 @@
+.grade-exam-wrapper {
+  width: 90%;
+  margin: 10px auto;
+  background-color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.sub-list {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.sub-list table {
+  width: 100%;
+  border-spacing: 0px;
+}
+.sub-list td {
+  text-align: center;
+  padding: 10px 5px;
+  border-top: 1px solid rgb(186, 186, 186);
+}
+.sub-list th {
+  padding: 10px 5px;
+}

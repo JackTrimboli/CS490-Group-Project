@@ -1,0 +1,16 @@
+.grading-wrapper {
+  width: 90%;
+  margin: 25px auto;
+  background-color: #fff;
+  border-radius: 10px;
+}
+.header {
+  margin: 10px;
+}
+.submission-list table {
+  /* border: 1px solid black; */
+  width: 100%;
+}
+.submission-list td {
+  text-align: center;
+}

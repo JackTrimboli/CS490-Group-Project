@@ -1,0 +1,22 @@
+.btn {
+  border: none;
+  outline: none;
+  padding: 10px;
+  background-color: #24a0ed;
+  color: #fff;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  width: fit-content;
+}
+.btn:hover {
+  transform: scale(1.03);
+}
+.disabled {
+  background-color: grey;
+  color: rgb(246, 246, 246);
+  cursor: not-allowed;
+}
+.disabled:hover {
+  transform: none;
+}

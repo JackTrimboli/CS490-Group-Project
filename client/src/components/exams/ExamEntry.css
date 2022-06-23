@@ -1,0 +1,43 @@
+.exam-entry {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  /* justify-content: space-between; */
+  height: 50px;
+  width: 100%;
+  margin: 0 auto;
+  background-color: #fff;
+}
+.exam-entry:hover {
+  background-color: rgb(212, 212, 212);
+}
+.exam-id {
+  min-width: 20%;
+  margin-left: 5px;
+  text-align: left;
+}
+.edit-cell {
+  margin-left: auto;
+  margin-right: 5px;
+}
+.edit-icon {
+  cursor: pointer;
+  color: orange;
+  font-size: xx-large;
+  z-index: 5;
+}
+.edit-link {
+  z-index: 100;
+  width: 100%;
+  height: 100%;
+}
+.edit-icon:hover {
+  color: white;
+}
+
+.even {
+  background-color: rgb(241, 241, 241);
+}
+.odd {
+  background-color: #fff;
+}
