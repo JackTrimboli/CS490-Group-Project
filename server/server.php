@@ -398,8 +398,8 @@ switch($opCode)
 			{
 				foreach($user['questions'] as $question)
 				{
-					$sqlQuery .= "({$inputData['testID']}, {$user['userID']}, {$question['questionID']}, '{$question['functionName']}', '{$question['testFunction']}', {$question['functionScore']},
-					{$question['functionScore']}, {$question['constraintScore']}, {$question['constraintScore']}), ";
+					$sqlQuery .= "({$inputData['testID']}, {$user['userID']}, {$question['questionID']}, '{$question['functionName']}', '{$question['testFunction']}',
+					{$question['functionScore']}, {$question['functionScore']}, {$question['constraintScore']}, {$question['constraintScore']}), ";
 					//$sqlQuery .= "({$inputData['testID']}, {$user['userID']}, {$question['questionID']}), ";
 					foreach($question['scores'] as $case)
 					{
@@ -414,7 +414,8 @@ switch($opCode)
 			$sqlCases = rtrim($sqlCases, ', ');
 
 			$sqlQuery .= ' ON DUPLICATE KEY UPDATE testID=VALUES(testID), userID=VALUES(userID), questionID=VALUES(questionID), functionName=VALUES(functionName), testFunctionName=VALUES(testFunctionName),
-			functionScore=VALUES(functionScore), functionActualScore=VALUES(functionActualScore); ';
+			functionScore=VALUES(functionScore), functionActualScore=VALUES(functionActualScore), constraintScore=VALUES(constraintScore),
+			constraintActualScore=VALUES(constraintActualScore); ';
 			$sqlQuery .= $sqlCases . ';';
 			//echo $sqlQuery;
 			//return $sqlQuery;
