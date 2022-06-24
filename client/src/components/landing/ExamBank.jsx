@@ -1,10 +1,11 @@
 import { React, useEffect, useState } from 'react'
 import axios from 'axios'
-import Select from 'react-select'
 import AddButton from '../shared/AddButton/AddButton'
 import ExamList from '../exams/ExamList'
 import './ExamBank.css'
 import { Dialog, TextField, DialogActions, DialogContentText, DialogContent, Button, DialogTitle } from '@mui/material'
+import Snackbar from '@mui/material/Snackbar';
+import MuiAlert from '@mui/material/Alert';
 
 const ExamBank = (props) => {
 
@@ -102,14 +103,16 @@ const ExamBank = (props) => {
             {!props.isStudent ?
                 <div className='exam-actions'>
                     <div className='exam-filters'>
-                        <Select options={null} />
-                        <Select options={null} />
+                        <h2 style={{ marginLeft: '10px' }}>Exam Bank</h2>
                     </div>
                     <AddButton clickFunc={openDialog} />
-                </div> : null}
+                </div> :
+                <div className='exam-actions'>
+                    <h2>Exam Bank</h2>
+                </div>}
 
             <div className='exam-list-wrapper'>
-                <ExamList className="exam-list" exams={examData} isStudent={props.isStudent} />
+                <ExamList className="exam-list" exams={examData} getExams={getExams} isStudent={props.isStudent} />
             </div>
         </div>
 

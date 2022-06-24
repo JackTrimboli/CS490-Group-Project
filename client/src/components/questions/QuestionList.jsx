@@ -12,7 +12,7 @@ const QuestionList = (props) => {
             odd = false;
         else
             odd = true;
-        return <Question className="question-list-question" clickFunc={buffer} odd={odd} questionId={each.questionID} text={each.questionText} difficulty={each.difficulty} topic={each.topic} />
+        return <Question className="question-list-question" clickFunc={buffer} odd={odd} questionId={each.questionID} text={each.questionText} difficulty={each.difficulty} topic={each.topic} question={each} />
     })
 
     return (

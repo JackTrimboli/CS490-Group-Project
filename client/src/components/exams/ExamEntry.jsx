@@ -1,4 +1,4 @@
-import React from 'react'
+import { React, useState } from 'react'
 import './ExamEntry.css'
 import EditIcon from '@mui/icons-material/Edit';
 import { Link } from 'react-router-dom';
@@ -27,7 +27,6 @@ const ExamEntry = (props) => {
             headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET,PUT,POST,DELETE,PATCH,OPTIONS' },
             data: { testID: parseInt(props.examID) }
         }
-        console.log('autograde fired')
         axios.request(grade).then((response) => {
             if (!!response.data) {
                 console.log(response.data)
@@ -35,6 +34,7 @@ const ExamEntry = (props) => {
         }).catch((err) => {
             console.log(err);
         });
+        props.getExams()
     }
 
     const releaseTest = () => {
@@ -51,7 +51,7 @@ const ExamEntry = (props) => {
         }).catch((err) => {
             console.log(err);
         });
-
+        props.getExams()
     }
 
     const releaseGrades = () => {
@@ -68,44 +68,45 @@ const ExamEntry = (props) => {
         }).catch((err) => {
             console.log(err);
         });
-
-
+        props.getExams()
     }
 
     return (
-        <tr className={`exam-entry ${props.odd ? "odd" : "even"}`}>
-            <th className='exam-id'>#{props.examID}</th>
-            <th>{props.name}</th>
-            <td className='edit-cell'>
-                {!props.isStudent ? //Teacher Exam Entry
-                    <div>
-                        <Link className='edit-link' to={redirect} >
-                            <EditIcon className='edit-icon'>Edit</EditIcon>
-                        </Link>
-                        <Link to={gradeLink}>
-                            <Button text="Grade" />
-                        </Link>
-                        {props.exam.autoGrading === "1" && props.exam.gradesReleased === "0" ? <Button disabled text="Auto" clickFunc={autoGrade} /> : <Button text="Auto" clickFunc={autoGrade} />}
-                        {props.exam.testReleased === "1" && props.exam.autoGrade === "0" && props.exam.gradesReleased === "0" ? <Button disabled text="Release Test" clickFunc={releaseTest} /> : <Button text="Release Test" clickFunc={releaseTest} />}
-                        {props.exam.gradesReleased === "1" ? <Button disabled text="Release Grades" clickFunc={releaseGrades} /> : <Button text="Release Grades" clickFunc={releaseGrades} />}
-                    </div> : //Student Exam Entry
-                    <div>
-                        {props.exam.autoGrading === "1" && props.exam.gradesReleased === "1" ?
-                            <Link className='edit-link' to={gradeLink}>
-                                <Button text="SEE GRADES" />
-                            </Link> :
-                            <Button disabled text="SEE GRADES" />
-                        }
-                        {props.exam.testReleased === "1" && props.exam.autoGrading === "0" ?
-                            <Link className='edit-link' to={redirect}>
-                                <Button text="TAKE EXAM" />
-                            </Link> :
-                            <Button text="TAKE EXAM" disabled />
-                        }
-                    </div>}
-            </td>
-        </tr>
-
+        <div>
+            <tr className={`exam-entry ${props.odd ? "odd" : "even"}`}>
+                <th className='exam-id'>#{props.examID}</th>
+                <th>{props.name}</th>
+                <td className='edit-cell'>
+                    {!props.isStudent ? //Teacher Exam Entry
+                        <div style={{ width: '100%', display: 'flex', justifyContent: 'space-around', height: 'fit-content' }}>
+                            <Link className='edit-link' to={redirect} >
+                                <EditIcon className='edit-icon'>Edit</EditIcon>
+                            </Link>
+                            <Link to={gradeLink}>
+                                <Button text="Grade" />
+                            </Link>
+                            {parseInt(props.exam.autoGrading) === 1 ? <Button disabled text="Auto" clickFunc={autoGrade} /> : <Button text="Auto" clickFunc={autoGrade} />}
+                            {parseInt(props.exam.testReleased) === 1 ? <Button disabled text="Release Test" clickFunc={releaseTest} /> : <Button text="Release Test" clickFunc={releaseTest} />}
+                            {parseInt(props.exam.gradesReleased) === 1 ? <Button disabled text="Release Grades" clickFunc={releaseGrades} /> : <Button text="Release Grades" clickFunc={releaseGrades} />}
+                        </div> : //Student Exam Entry
+                        <div style={{ width: '100%', display: 'flex', justifyContent: "flex-end", height: 'fit-content' }}>
+                            {parseInt(props.exam.autoGrading) === 1 && parseInt(props.exam.gradesReleased) === 1 ?
+                                <Link className='edit-link' to={gradeLink} style={{ marginRight: "5px", padding: 0 }}>
+                                    <Button text="SEE GRADES" />
+                                </Link> :
+                                <span style={{ marginRight: "5px" }}>
+                                    <Button disabled text="SEE GRADES" style={{ marginRight: "5px", padding: 0 }} /></span>
+                            }
+                            {parseInt(props.exam.testReleased) === 1 && parseInt(props.exam.autoGrading) === 0 ?
+                                <Link className='edit-link' to={redirect}>
+                                    <Button text="TAKE EXAM" />
+                                </Link> :
+                                <Button text="TAKE EXAM" disabled />
+                            }
+                        </div>}
+                </td>
+            </tr>
+        </div>
     )
 }
 

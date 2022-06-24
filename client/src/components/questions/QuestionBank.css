@@ -1,5 +1,6 @@
 .questions-wrapper {
   width: 90%;
+  height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -18,6 +19,7 @@
 .question-filters {
   display: flex;
   flex-direction: row;
+  min-width: 20%;
 }
 .questions-loader {
   width: 100%;

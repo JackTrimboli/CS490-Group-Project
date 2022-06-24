@@ -1,30 +1,35 @@
 .exam-editor-wrapper {
   width: 90%;
   margin: 25px auto;
+  background-color: #fff;
+  border-radius: 5px;
+  padding: 2.5px;
 }
+
 .exam-editor-info {
   text-align: center;
   color: gray;
   margin-bottom: 10px;
 }
 .splitscreen {
-  width: 100%;
+  max-width: 100%;
   display: flex;
+  overflow: hidden;
+}
+.exam-questions {
+  width: 50%;
+  margin-right: 5px;
+  border-top: 1px solid rgb(246, 240, 240);
+  border-right: 1px solid rgb(246, 240, 240);
+  border-left: 1px solid rgb(246, 240, 240);
 }
 .exam-table {
   width: 100%;
+  table-layout: fixed;
 }
 .exam-table-body {
   width: 100%;
 }
-.exam-questions {
-  width: 50%;
-
-  margin-right: 5px;
-  border-right: 1px solid rgb(191, 191, 191);
-}
-.remaining-questions {
-  width: 50%;
-  margin-left: 5px;
-  border-left: 1px solid rgb(191, 191, 191);
+.exam-table-body tr {
+  width: 100%;
 }

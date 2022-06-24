@@ -1,7 +1,6 @@
 import { React, useState, useEffect } from 'react'
 import axios from 'axios'
 import './QuestionBank.css'
-import AddButton from '../shared/AddButton/AddButton'
 import QuestionList from './QuestionList'
 import PacmanLoader from "react-spinners/PacmanLoader";
 import { css } from "@emotion/react";
@@ -11,8 +10,9 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import FormLabel from '@mui/material/FormLabel';
 import Radio from '@mui/material/Radio';
 import MenuItem from '@mui/material/MenuItem';
-import Select from 'react-select';
 import { default as MyButton } from '../shared/Button/Button'
+import Snackbar from '@mui/material/Snackbar';
+import MuiAlert from '@mui/material/Alert';
 
 
 
@@ -28,16 +28,20 @@ const QuestionBank = (props) => {
 
 
     const [isLoading, setIsLoading] = useState(false);
-    const [questionData, setQuestionData] = useState(null);
+    const [questionData, setQuestionData] = useState([]);
     const [topics, setTopics] = useState([]);
     const [open, setOpen] = useState(false);
     const [difficulty, setDifficulty] = useState("easy");
+    const [selectedDifficulty, setSelectedDifficulty] = useState("");
+    const [selectTopic, setSelectTopic] = useState("");
     const [functionName, setFunctionName] = useState("");
     const [testCases, setTestCases] = useState([{ "input": "", "output": "" }])
     const [questionText, setQuestionText] = useState("");
-    const [selectedTopic, setSelectedTopic] = useState("");
+    const [selectedTopic, setSelectedTopic] = useState(null);
     const [constraint, setConstraint] = useState("none");
     const [isDropdown, setIsDropDown] = useState(true);
+    const [search, setSearch] = useState("");
+    const [showSuccess, setShowSuccess] = useState(false)
 
     useEffect(() => {
         setIsLoading(true);
@@ -55,11 +59,6 @@ const QuestionBank = (props) => {
         setIsLoading(false);
     }, [])
 
-    const diffOptions = [
-        { value: 'easy', label: 'Easy' },
-        { value: 'medium', label: 'Medium' },
-        { value: 'hard', label: 'Hard' }
-    ]
 
     const override = css`
         opacity: 60%;
@@ -145,7 +144,6 @@ const QuestionBank = (props) => {
 
             console.log(response);
             if (!!response.data.questionID) {
-                console.log("Create new question of ID: ", response.data.questionID)
                 let question = {
                     difficulty: difficulty,
                     functionName: functionName,
@@ -157,6 +155,7 @@ const QuestionBank = (props) => {
                 }
                 const newData = [question, ...questionData]
                 setQuestionData(newData);
+                setShowSuccess(true)
             }
         }).catch((err) => {
             console.log(err);
@@ -172,6 +171,40 @@ const QuestionBank = (props) => {
             setIsDropDown(false)
         else
             setIsDropDown(true)
+    }
+
+    const handleDiffSelectChange = (event) => {
+        setSelectedDifficulty(event.target.value)
+    }
+    const handleSelectTopicChange = (event) => {
+        setSelectTopic(event.target.value)
+    }
+    const handleSearchChange = (event) => {
+        setSearch(event.target.value)
+    }
+
+    const submitFilters = () => {
+        debugger;
+        setIsLoading(true)
+        const filterQuestions = {
+            method: 'POST',
+            url: "https://afsaccess4.njit.edu/~jdt34/GetQuestionBank.php",
+            headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET,PUT,POST,DELETE,PATCH,OPTIONS' },
+            data: {
+                teacherID: parseInt(props.user.id),
+                difficulty: selectedDifficulty ? selectedDifficulty : null,
+                topic: selectTopic ? selectTopic : null,
+                keyword: search,
+            }
+        };
+        axios.request(filterQuestions).then((response) => {
+            console.log(response)
+            if (!!response.data.questions)
+                setQuestionData(response.data.questions)
+        }).catch((err) => {
+            console.log(err)
+        })
+        setIsLoading(false)
     }
 
 
@@ -296,23 +329,73 @@ const QuestionBank = (props) => {
                     <Button onClick={handleSubmit}>Submit Question</Button>
                 </DialogActions>
             </Dialog>
-
-
-            <div className='questions-actions'>
-                <div className='question-filters'>
-                    <Select options={diffOptions} />
-                    <Select options={topics} />
+            <h2>Question Bank</h2>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '50px', height: 'fit-content', width: '100%' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', width: '50%' }}>
+                    <div className='question-filters' style={{ width: '50%' }}>
+                        <TextField
+                            id="outlined-select-currency-native"
+                            margin='normal'
+                            label="Topic"
+                            select
+                            value={selectTopic}
+                            onChange={handleSelectTopicChange}
+                            style={{ width: '50%', marginRight: '2px' }}
+                        >
+                            <MenuItem key="None" value={null}>None</MenuItem>
+                            {topics.map((option, index) => (
+                                <MenuItem key={topics[index]} value={topics[index]}>
+                                    {topics[index]}
+                                </MenuItem>
+                            ))}
+                        </TextField>
+                        <TextField
+                            id="outlined-select-currency-native"
+                            margin='normal'
+                            label="Difficulty"
+                            select
+                            value={selectedDifficulty}
+                            onChange={handleDiffSelectChange}
+                            style={{ width: '50%', marginRight: '2px' }}
+                        >
+                            <MenuItem key="None" value={null}>None</MenuItem>
+                            <MenuItem key="easy" value="easy">Easy</MenuItem>
+                            <MenuItem key="medium" value="medium">Medium</MenuItem>
+                            <MenuItem key="hard" value="hard">Hard</MenuItem>
+                        </TextField>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', width: '50%' }}>
+                        <TextField
+                            autoFocus
+                            margin="normal"
+                            id="name"
+                            label="Keyword"
+                            value={search}
+                            onChange={handleSearchChange}
+                            type="text"
+                            variant="standard"
+                            style={{ flex: '1 0', height: '100%', marginBottom: 'auto' }}
+                        />
+                        <Button onClick={submitFilters}>Apply Filters</Button>
+                    </div>
                 </div>
                 <MyButton text="Add New Question" clickFunc={handleClick} />
             </div>
+
             {isLoading ?
                 <div className='questions-loader'>
                     <PacmanLoader css={override} color='#2e8bc0' size={50} />
                     <h3>Getting your questions...</h3>
-                </div> : questionData ?
-                    <QuestionList questions={questionData} /> :
-                    <div className='no-questions'>It seems your question bank is currently empty. Hit the 'add new' button to start adding questions!</div>
+                </div>
+                : questionData.length ?
+                    <QuestionList questions={questionData} />
+                    : <div className='no-questions'>No Results. Hit the 'add new' button to start adding questions!</div>
             }
+            <Snackbar open={showSuccess} autoHideDuration={6000} onClose={() => setShowSuccess(false)}>
+                <MuiAlert onClose={() => setShowSuccess(false)} severity="success" sx={{ width: '100%' }} className="Mui-success">
+                    Question Added
+                </MuiAlert>
+            </Snackbar>
         </div>
     )
 }

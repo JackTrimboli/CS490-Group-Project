@@ -10,7 +10,7 @@ const ExamList = (props) => {
             odd = false;
         else
             odd = true;
-        return <ExamEntry className="entry" isStudent={props.isStudent} odd={odd} examID={each.testID} exam={each} questions={each.questions} name={each.testName} teacherID={each.teacherID} />
+        return <ExamEntry className="entry" getExams={props.getExams} isStudent={props.isStudent} odd={odd} examID={each.testID} exam={each} questions={each.questions} name={each.testName} teacherID={each.teacherID} />
     })
 
     return (

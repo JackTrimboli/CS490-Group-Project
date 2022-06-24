@@ -1,7 +1,7 @@
 import { React, useState, useEffect } from 'react'
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios'
-import { FormLabel, TextField } from '@mui/material';
+import { TextField } from '@mui/material';
 import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
@@ -10,6 +10,8 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import './GradeExam.css'
 import Button from '../shared/Button/Button';
 import { Divider } from '@mui/material';
+import Snackbar from '@mui/material/Snackbar';
+import MuiAlert from '@mui/material/Alert';
 
 
 const GradeExam = (props) => {
@@ -22,10 +24,24 @@ const GradeExam = (props) => {
     const [pointsEarned, setPointsEarned] = useState([]);
     const [expanded, setExpanded] = useState('panel_0');
     const [testObj, setTestObj] = useState({});
+    const [showUpdateSuccess, setShowUpdateSuccess] = useState(false);
+    const [showFunctionErrorMessage, setShowFunctionErrorMessage] = useState(false);
+    const [showConstraintErrorMessage, setShowConstraintErrorMessage] = useState(false);
+    const [showScoreErrorMessage, setShowScoreErrorMessage] = useState(false);
+    const [containsFunctionError, setContainsFunctionError] = useState(false);
+    const [containsConstraintError, setContainsConstraintError] = useState(false);
+    const [containsScoreError, setContainsScoreError] = useState(false);
+    const [max, setMax] = useState(0)
+    const [totalEarned, setTotalEarned] = useState(0);
 
+    let scoredata
 
     useEffect(() => {
+        getScores();
 
+    }, [])
+
+    const getScores = () => {
         const test = searchParams.get("id");
         const user = searchParams.get("userID")
         if (test)
@@ -33,7 +49,7 @@ const GradeExam = (props) => {
         if (user)
             setUserID(parseInt(user))
 
-        const scoredata = {
+        scoredata = {
             method: 'POST',
             url: "https://afsaccess4.njit.edu/~jdt34/GetScores.php",
             headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET,PUT,POST,DELETE,PATCH,OPTIONS' },
@@ -52,24 +68,46 @@ const GradeExam = (props) => {
         }).catch((err) => {
             console.log(err);
         });
-
-    }, [])
+    }
 
     const calculateScores = (scoreList) => {
         let arr = []
+        let testSum = 0;
+        let testMax = 0;
         let sum = 0
         for (let i = 0; i < scoreList.length; i++) {
             sum += parseFloat(scoreList[i].functionActualScore)
+            sum += parseFloat(scoreList[i].constraintActualScore)
+            testMax += parseFloat(scoreList[i].questionValue)
             for (let j = 0; j < scoreList[i].scores.length; j++) {
                 sum += parseFloat(scoreList[i].scores[j].actualScore)
             }
             arr.push(Math.round(100 * sum) / 100);
+            testSum += (100 * sum / 100)
 
             sum = 0;
         }
+        setTotalEarned(testSum)
+        setMax(testMax)
         setPointsEarned(arr);
     }
     const updateScores = () => {
+
+        let containsError = false;
+        if (containsFunctionError) {
+            containsError = true;
+            setShowFunctionErrorMessage(true)
+        }
+        if (containsConstraintError) {
+            containsError = true;
+            setShowConstraintErrorMessage(true)
+        }
+        if (containsScoreError) {
+            containsError = true;
+            setShowScoreErrorMessage(true)
+        }
+        if (containsError)
+            return;
 
         const scoreData = {
             method: 'POST',
@@ -84,6 +122,8 @@ const GradeExam = (props) => {
         }).catch((err) => {
             console.log(err);
         });
+        getScores()
+        setShowUpdateSuccess(true);
     }
 
     const handleChange = (panel) => (event, newExpanded) => {
@@ -93,18 +133,63 @@ const GradeExam = (props) => {
     const handleFunctionScoreChange = (index, event) => {
         let newTestObj = testObj;
         newTestObj.questions[index].functionActualScore = parseFloat(event.target.value);
+
+        // let containsError = false;
+        // for (let i = 0; i < newTestObj.questions.length; i++) {
+        //     if (newTestObj.questions[i].functionScore < newTestObj.questions[i].functionActualScore || newTestObj.questions[i].functionActualScore < 0) {
+        //         containsError = true;
+        //         break;
+        //     }
+        // }
+        // if (containsError)
+        //     setContainsFunctionError(true);
+        // else
+        //     setContainsFunctionError(false);
+
         setTestObj(newTestObj);
     }
+
     const handleScoreChange = (index, subIndex, event) => {
         let newTestObj = testObj;
         newTestObj.questions[index].scores[subIndex].actualScore = parseFloat(event.target.value);
+
+        // let containsError = false;
+        // for (let i = 0; i < newTestObj.questions.length; i++) {
+        //     for (let j = 0; j < newTestObj.questions[i].scores.length; j++) {
+        //         if (newTestObj.questions[i].scores[j].autoScore < newTestObj.questions[i].scores[j].actualScore || newTestObj.questions[i].scores[j].actualScore < 0) {
+        //             containsError = true;
+        //             break;
+        //         }
+        //     }
+        // }
+        // if (containsError)
+        //     setContainsScoreError(true)
+        // else
+        //     setContainsScoreError(false)
         setTestObj(newTestObj);
     }
+
     const handleConstraintScoreChange = (index, event) => {
         let newTestObj = testObj;
         newTestObj.questions[index].constraintActualScore = parseFloat(event.target.value);
+
+        // let containsError = false;
+        // for (let i = 0; i < newTestObj.questions.length; i++) {
+        //     if (newTestObj.questions[i].constraintScore < newTestObj.questions[i].constraintActualScore || newTestObj.questions[i].constraintActualScore < 0) {
+        //         containsError = true;
+        //         break;
+        //     }
+        // }
+
+        // if (containsError)
+        //     setContainsConstraintError(true)
+        // else
+        //     setContainsConstraintError(false)
+
         setTestObj(newTestObj);
     }
+
+
     const handleCommentChange = (index, event) => {
         let newTestObj = testObj;
         newTestObj.questions[index].comment = (event.target.value);
@@ -116,11 +201,13 @@ const GradeExam = (props) => {
             {!props.isStudent ?
                 <div style={{ width: '90%', display: 'flex', justifyContent: "space-between" }}>
                     <div><h2>Grades for Student #{userID} | Test #{testID}</h2></div>
+                    <div><h3>Total Score:</h3></div>
                     <div style={{ height: '100%', margin: 'auto 0' }}><Button clickFunc={updateScores} text="Update Question Info" /></div>
                 </div>
                 :
                 <div style={{ width: '90%', display: 'flex', justifyContent: "space-between" }}>
                     <div><h2>{props.user.name}'s Grades for Test #{testID}</h2></div>
+                    <div><h2>Total Score: {Math.round(totalEarned * 100) / 100}/{max} ({Math.round((totalEarned / max * 100) * 100) / 100}%)</h2></div>
                 </div>
             }
             <div className='sub-list'>
@@ -142,6 +229,7 @@ const GradeExam = (props) => {
                                             <th>TestCase Input </th>
                                             <th>Expected Output</th>
                                             <th>Your Output</th>
+                                            <th>Max Points</th>
                                             <th>Points Earned</th>
                                         </tr>
                                         <tr>
@@ -149,12 +237,15 @@ const GradeExam = (props) => {
                                             <td>{res.functionName}</td>
                                             <td>{res.functionName}</td>
                                             <td>{res.testFunctionName}</td>
+                                            <td>{res.funcConstraint !== "none" ?
+                                                Math.round(res.questionValue / (res.scores.length + 2) * 1000) / 1000
+                                                : Math.round(res.questionValue / (res.scores.length + 1) * 1000) / 1000}</td>
                                             <td>
                                                 {!props.isStudent ?
                                                     <TextField
                                                         onChange={(e) => handleFunctionScoreChange(index, e)}
                                                         type="number"
-                                                        defaultValue={res.functionActualScore} />
+                                                        defaultValue={parseFloat(res.functionActualScore)} />
                                                     :
                                                     <p>{res.functionActualScore}</p>
                                                 }
@@ -163,6 +254,7 @@ const GradeExam = (props) => {
                                         {res.funcConstraint === "none" ?
                                             <tr>
                                                 <th>Constraint</th>
+                                                <td>N/A</td>
                                                 <td>N/A</td>
                                                 <td>N/A</td>
                                                 <td>N/A</td>
@@ -177,14 +269,18 @@ const GradeExam = (props) => {
                                             <tr>
                                                 <th>Contraint</th>
                                                 <td>{res.funcConstraint}</td>
-                                                <td>N/A</td>
-                                                <td>N/A</td>
+                                                <td>{res.funcConstraint}</td>
+                                                <td>{res.constraintActualScore > 0 ? "Correct" : "Incorrect"}</td>
+                                                <td>{res.funcConstraint !== "none" ?
+                                                    Math.round(res.questionValue / (res.scores.length + 2) * 1000) / 1000
+                                                    : Math.round(res.questionValue / (res.scores.length + 1) * 1000) / 1000}</td>
                                                 <td>
                                                     {!props.isStudent ?
                                                         <TextField
+                                                            min="0"
                                                             onChange={(e) => handleConstraintScoreChange(index, e)}
-                                                            defaultValue={res.constraintActualScore}
-                                                            type="number"
+                                                            defaultValue={parseFloat(res.constraintActualScore)}
+
                                                         /> :
                                                         <p>{res.constraintActualScore}</p>
                                                     }
@@ -199,12 +295,16 @@ const GradeExam = (props) => {
                                                     <td>{res.functionName}({element.input})</td>
                                                     <td>{element.expectedOutput}</td>
                                                     <td>{element.actualOutput}</td>
+                                                    <td>{res.funcConstraint !== "none" ?
+                                                        Math.round(res.questionValue / (res.scores.length + 2) * 1000) / 1000
+                                                        : Math.round(res.questionValue / (res.scores.length + 1) * 1000) / 1000}</td>
                                                     <td>
                                                         {!props.isStudent ?
                                                             <TextField
                                                                 type="number"
+                                                                min="0"
                                                                 onChange={(e) => handleScoreChange(index, idx, e)}
-                                                                defaultValue={element.actualScore}
+                                                                defaultValue={parseFloat(element.actualScore)}
                                                             /> : <p>{element.actualScore}</p>
                                                         }
                                                     </td>
@@ -234,6 +334,26 @@ const GradeExam = (props) => {
                         </Accordion>)
                 })}
             </div >
+            <Snackbar open={showUpdateSuccess} autoHideDuration={6000} onClose={() => setShowUpdateSuccess(false)}>
+                <MuiAlert onClose={(() => setShowUpdateSuccess(false))} severity="success" sx={{ width: '100%' }} className="Mui-success">
+                    Test Successfully Updated!
+                </MuiAlert>
+            </Snackbar>
+            <Snackbar open={showFunctionErrorMessage} autoHideDuration={6000} onClose={() => setShowFunctionErrorMessage(false)}>
+                <MuiAlert onClose={(() => setShowFunctionErrorMessage(false))} severity="error" sx={{ width: '100%' }} className="Mui-error">
+                    Failed to update: Points entered incorrectly for function name. Make sure all point values are between 0 and the max score.
+                </MuiAlert>
+            </Snackbar>
+            <Snackbar open={showConstraintErrorMessage} autoHideDuration={6000} onClose={() => setShowConstraintErrorMessage(false)}>
+                <MuiAlert onClose={(() => setShowConstraintErrorMessage(false))} severity="error" sx={{ width: '100%' }} className="Mui-error">
+                    Failed to update: Points entered incorrectly for at least one constraint. Make sure all point values are between 0 and the max score.
+                </MuiAlert>
+            </Snackbar>
+            <Snackbar open={showScoreErrorMessage} autoHideDuration={6000} onClose={() => setShowScoreErrorMessage(false)}>
+                <MuiAlert onClose={(() => setShowScoreErrorMessage(false))} severity="error" sx={{ width: '100%' }} className="Mui-error">
+                    Failed to update: Points entered incorrectly for at least one testcase. Make sure all point values are between 0 and the max score.
+                </MuiAlert>
+            </Snackbar>
         </div >
     )
 }

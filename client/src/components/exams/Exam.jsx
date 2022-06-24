@@ -1,14 +1,15 @@
 import { React, useState, useEffect } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Dialog, TextField, DialogActions, DialogContentText, DialogContent, Button, DialogTitle } from '@mui/material';
+import { Button } from '@mui/material';
 import Editor from 'react-simple-code-editor';
 import { highlight, languages } from 'prismjs/components/prism-core';
 import 'prismjs/components/prism-clike';
 import 'prismjs/components/prism-python';
 import 'prismjs/themes/prism.css'; //Example style, you can use another
 import './Exam.css'
-import { default as MyButton } from '../shared/Button/Button';
+import Snackbar from '@mui/material/Snackbar';
+import MuiAlert from '@mui/material/Alert';
 
 const Exam = (props) => {
 
@@ -19,6 +20,7 @@ const Exam = (props) => {
     const [currentQuestion, setCurrentQuestion] = useState({})
     const [code, setCode] = useState("");
     const [answers, setAnswers] = useState([]);
+    const [showSuccess, setShowSuccess] = useState(false)
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -92,6 +94,7 @@ const Exam = (props) => {
         }).catch((err) => {
             console.log(err);
         });
+        setShowSuccess(true)
         navigate('/Exams')
     }
 
@@ -106,7 +109,7 @@ const Exam = (props) => {
                 })}
             </div>
             <h4>Question {questions.indexOf(currentQuestion) + 1} out of {questions.length}</h4>
-            <p>{currentQuestion.questionText} ({currentQuestion.questionValue} pts.)</p>
+            <p>{!!currentQuestion && !!currentQuestion.questionText ? currentQuestion.questionText : "Question Text Not Found :("} ({!!currentQuestion && !!currentQuestion.questionValue ? currentQuestion.questionValue : "0"} pts.)</p>
             <Editor
 
                 className='exam-code'
@@ -124,6 +127,11 @@ const Exam = (props) => {
                 <Button disabled={questions.indexOf(currentQuestion) === questions.length - 1} onClick={nextQuestion}>Next</Button>
                 {(questions.indexOf(currentQuestion) === questions.length - 1) ? <Button onClick={handleSubmit}>Submit</Button> : null}
             </div>
+            <Snackbar open={showSuccess} autoHideDuration={6000} onClose={() => setShowSuccess(false)}>
+                <MuiAlert onClose={() => setShowSuccess(false)} severity="success" sx={{ width: '100%' }} className="Mui-success">
+                    Exam Submitted!
+                </MuiAlert>
+            </Snackbar>
         </div >
     )
 }
